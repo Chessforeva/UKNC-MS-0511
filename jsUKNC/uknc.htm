@@ -1,0 +1,492 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru">
+
+<head>
+<title>UKNC emulator JS beta v0.6</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+</head>
+<body onload="loaded()" background="uknc_bg.jpg">
+
+<div id="bg" style="width:980px;height:820px;position:absolute;top:0px;left:0px;" onmousedown="preventaction(event)"></div>
+
+<!--
+UKNC Elektronika MS-0511 emulator HTML5 javascript
+beta 0.6 (03.2021), not any right reserved:)
+
+JS ported from UKNCBTL. All the knowledges and thanks.
+
+
+ Эмулятор JS УКНЦ 
+  исходняк: UKNCBTL
+  
+ Проект "вспомним детство".
+ Пока сырой, терпения. Удивительно, удалось ускорить.
+ 
+Itogo:
+ 
+  NO TAPE. Standard FLOPPY DISKS.
+  Poor sound. Much to do, but later
+  
+Soviet school computer during 80s-90s.
+2 CPUs ~8MHz 16 bit !
+
+-->
+	<!-- 32Kb ROM to load 100000:...,
+	BASIC.uknc except ROM,
+	LoaderMenu before the disk,rom loader -->
+<script src="SysROMs.js"></script>
+
+ <!--- The emulator UKNC scripts -->
+<script src="Gbin.js"></script>
+<script src="Defines.js"></script>
+<script src="Disasm.js"></script>
+<script src="KM1801VM2.js"></script>
+<script src="MemoryController.js"></script>
+<script src="Floppy.js"></script>
+<script src="Board.js"></script>
+<script src="Screen.js"></script>
+<script src="Keyboard.js"></script>
+<script src="Speed.js"></script>
+<script src="DBG.js"></script>
+<script src="MAINs.js"></script>
+<script src="Touches.js"></script>
+
+
+<style>
+.disSel{ -webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+outline: 0;
+}
+
+.dbg0 { font-family: Courier; font-size:14px }
+</style>
+
+
+<script type="text/javascript">
+
+var Touch_Buttons = true || (TOUCH_ || MOBILE_);	/* to enable-disable */
+
+var href = document.location.href;
+	
+WindoW = { width: window.innerWidth ||
+	document.documentElement.clientWidth || document.body.clientWidth,
+	height: window.innerHeight || 
+	document.documentElement.clientHeight || document.body.clientHeight };
+
+
+var knightHackKeys = 0;		// Substituted spacebar
+	
+</script>
+
+<!-- Canvas UKNC_canvas -->
+<div class="disSel" id="dropfile" style="position:absolute;left:0px;top:0px;
+	width:654px;height:492px;
+        border: 2px dashed #333333; border-radius: 5px;
+        text-align: center; font: 12pt bold; color: black;">
+
+<div id="filesloaded" style="display:inline">
+<font color="white">Drop a .uknc .dsk .sav .gme .rom file here, or zipped one</font>
+<div id="download_zone" style="color:blue;display:inline;visibility:hidden">
+<a id="download_file" style="color:#0bbb;display:inline;">Save file</a>
+</div>
+</div>
+
+<canvas id="UKNC_canvas" width="640px" height="288px" class="disSel"
+ style ="position:absolute;left:6px;top:20px;width:640px;height:460px;">
+</canvas>
+</div>
+<!-- 640x288 looks too wide -->
+
+
+
+<!-- User GUI options -->
+<div id="options" class="disSel" style ="position:absolute;left:0px;top:510px;background-color:#808080">
+<table>
+<tr>
+ 
+<td valign="top">
+ 
+ <select id="userboot" title="Booting options" onchange="userBoot()">
+  <option value="UKB">ROM + Basic</option>
+  <option value="UKZ">ROM + Menu</option>
+  <option value="RST">Reset restart (F12)</option>  
+  <option value="RLD">Reload clear all</option>
+  <option value="DBG">Debug (F9)</option>
+  <option value="PAF">PAF commander</option>
+  <option value="Keys">Keys about</option>
+ </select>
+
+<table>
+<tr><td>
+<div title="To save .uknc" onclick="download_uknc()" style="display:inline;cursor:pointer">
+<font color="brown" SIZE="2"><b><u>Save</u></b></font><a id="DOWNLUKNC"></a>
+</div>
+</td></tr>
+<tr><td>
+<font size="2"><div id="MHZshow"></div></font>
+</td></tr>
+</table>
+
+
+</td>
+<td width="2"></td>
+<td valign="top">
+
+ <select id="Speed_opts" title="Set cycles per second" onchange="optSpeed()">
+  <option title="As the original UKNCBTL" value="UKNCBTL">1) Properly!</option>
+  <option title="Optimized" value="S1_100">2) 1Kx100</option>
+  <option title="Optimized" value="S2_120">3) 2Kx120</option>
+  <option title="Optimized" value="S4_160">4) 4Kx160</option>
+  <option title="Optimized" value="S6_200">5) 6Kx200</option>
+  <option title="Optimized" value="S10_240">6) 10Kx240</option>
+  <option title="Optimized" value="S20_250">7) 20Kx250</option>
+ </select>
+</td>
+
+<td width="2"></td>
+<td valign="top"><select id="usercolor" title="Color schemes" onchange="userColor()">
+  <option value="RGB">RGB</option>
+  <option value="GRB">GRB</option>
+  <option value="DRK">Dark</option>
+  <option value="GRY">Gray</option>
+</select></td>
+ 
+ <td width="2"></td>
+
+  <td valign="top">
+ <select id="usergames" title="Loads and starts some games"
+	onchange="userGames()">
+  <option value="">♠♣♥♦ Games ♠♣♥♦</option>
+  <option value="knight.zip">Knight</option>
+  <option value="krakout.zip">Krakout</option>
+  <option value="welltris.zip">Welltris</option>
+  <option value="gm40">40 games</option>
+  <option value="hwyenc.zip">HwyEnc demo</option>  
+ </select>
+
+ 
+ 
+ <td width="2"></td>
+ <td valign="top">
+ <font size="2">
+  <input type="checkbox" id="toucheson" class="Ckbx"
+	title="Show or Hide big touch buttons" 
+	onclick="Touch_Buttons=!Touch_Buttons;">Touches<br>
+
+ </font></td>
+
+</tr>
+</table>
+
+
+</div>
+
+<script>
+
+CR = String.fromCharCode(13)+String.fromCharCode(10);
+
+function GE(id) { return document.getElementById(id); }
+
+var FullScreen = 0;	// Ctrl+Enter switch to FullScreen mode
+var LOADDSK = [];	// to know disks to load
+
+// prevent selections
+window.oncontextmenu = function(e) {
+e.preventDefault();
+e.stopPropagation();
+return false;
+};
+
+
+
+//-----------------------
+// The main BK global 
+//-----------------------
+//
+ 
+var keyboard = new Keyboard();
+
+    // Create devices
+var Cpu = new K1801VM2("CPU");
+var Ppu = new K1801VM2("PPU");
+
+Cpu.MC = new MemoryController(0);		// CPU memory control 
+Ppu.MC = new MemoryController(1);		// PPU memory control
+	
+var Board = new Motherboard();
+var FloppyCtl = new FloppyController();
+
+Board.Reset();
+Board.LoadROM(UkncROM);				// read UNKC_ROM.bin 32KB
+
+var scr = new Screen();				// Screen.js
+
+var disasm = new Disasm();
+var dbg = new DBG();
+var trace = new Trace();	// in DBG.js
+
+var speed = new Speed();
+speed.setOptimize(1);	// the default speed is optimized
+ 
+Board.LoadFromImage( UkncBasic,1 );
+
+function loaded() {
+ var D=GE("dropfile"), O=GE("UKNC_canvas"), o=GE("debug_div"), v=GE("tckr_div"), y=GE("options");
+ var d=GE("Speed_ops"), O=GE("UKNC_canvas"), o=GE("debug_div"), v=GE("tckr_div"), y=GE("options");
+ if(D==null || O==null || o==null || v==null || y==null) setTimeout('loaded()',999);
+ else
+  {
+	touchLoads();
+	touchShow(Touch_Buttons);
+	
+	scr.init();
+	scr.DRAW();				// first screen draw, basic visible
+	
+	dbg.init("debug_div");	// create debug window (hidden)
+	
+	//dbg.show();
+
+
+	GE("Speed_opts").value = "S4_160";
+	setTimeout('FPSinit()',200);
+
+	userLoop3sec();
+
+  }
+}
+
+document.onkeypress = keyact;
+document.onkeydown = keyact;
+document.onkeyup = keyact; 
+
+
+__u = "undefined";
+function __X(o) { return ( typeof(o.clientX)==__u ? o.pageX : o.clientX ); }
+function __Y(o) { return ( typeof(o.clientY)==__u ? o.pageY : o.clientY ); } 
+
+function kbPressed(e)
+{
+ var U = { X:0, Y:0 };
+ if(e.type == 'touchstart' || e.type == 'touchmove' || 
+	e.type == 'touchend' || e.type == 'touchcancel')
+  {
+   var touch = event.touches[0];
+   if(!(typeof(touch)==__u)) { U.X = __X(touch); U.Y = __Y(touch); }
+   else
+    {
+    touch = e.originalEvent.touches[0];
+    if(!(typeof(touch)==__u)) { U.X = __X(touch); U.Y = __Y(touch); }
+    else { U.X = __X(e); U.Y = __Y(e); }
+    }
+  }
+ else if (e.type == 'mousedown' || e.type == 'mouseup' ||
+	e.type == 'mousemove' || e.type == 'mouseover'||
+	e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave')
+  { U.X = __X(e); U.Y = __Y(e); } 
+
+}
+
+function clrKbv() { GE("kbvprsd").innerHTML=""; }
+
+function preventaction( ev )
+{
+if(ev.preventDefault)
+ {
+ //if(ev.stopPropagation) ev.stopPropagation();
+ ev.preventDefault();
+ }
+else ev.returnvalue = false;
+return false;
+}
+
+
+function download(FileName, DataStr) {
+   var d= GE("download_zone"); d.style.visibility = "visible";
+    var a = GE("download_file");
+    var file = new Blob([DataStr], {type: "text/plain"});
+    a.href = URL.createObjectURL(file);
+
+    a.download = FileName;
+    a.click();
+	return 0;
+}
+
+
+// User selected running speed
+function optSpeed() {
+	var v = GE("Speed_opts").value;
+	var S = speed, M=1000000;
+	switch(v) {
+	case "S1_100": S.set(64,100); break;
+	case "S2_120": S.set(125,120); break;
+	case "S4_160": S.set(250,160); break;
+	case "S6_200": S.set(375,200); break;
+	case "S10_240": S.set(625,240); break;
+	case "S20_250": S.set(1250,250); break;
+	}
+	S.setOptimize( (v=="UKNCBTL" ? 0:1 ) );
+}
+
+function userColor() {
+ switch(GE("usercolor").value) {
+ case "RGB": scr.setCol(0); break;
+ case "GRB": scr.setCol(1); break;
+ case "DRK": scr.setCol(2); break;
+ case "GRY": scr.setCol(3); break;
+ }
+ scr.DRAW();
+}
+
+//----------------
+// User GUI cases
+//----------------
+function userBoot() {
+ switch(GE("userboot").value) {
+ case "UKB":
+	Board.LoadFromImage(UkncBasic,1); scr.DRAW(); break;
+ case "UKZ":
+	Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
+ case "RST": Board.Reset(); scr.DRAW(); break;
+ case "RLD": document.location.href = href.split('?')[0]; break;
+ case "PAF":
+	Board.Reset(); LOADDSK = [ "PAF0.zip", "PAFa.zip" ]; GoDisks(); scr.setCol(3); break;
+ case "TB":
+	Board.Reset(); LOADDSK = [ "TurboBasic0.zip", "TurboBasicA.zip" ]; GoDisks(); break;
+ case "DBG": dbg.show(); break;
+ case "Keys": keysabout(); break;
+ }
+}
+
+setInterval('userLoop3sec()',3000);	// once per 3seconds
+
+// on each loop update option values
+function userLoop3sec()
+{
+ var Q,m,n,i,s,o;
+ Q = GE("usercolor");
+ if(Q!=null) {
+	m = scr.colscheme;
+	n = (m==0 ?"RGB":(m==1 ?"GRB":(m==2 ?"DRK":"GRY")));
+	if(n!=Q.value) Q.value=n;
+ }
+ 
+ Q = GE("filesloaded");
+ if(Q!=null) {
+	s="";
+	var b1='<FONT COLOR="brown" SIZE="3"><b><u>';
+	var b2='<div title="To download" onclick="download_dsk(';
+	var b3=')" style="display:inline;cursor:pointer">';
+	var b4='</div><a id="DOWNLOAD';
+	var b5='"></a></u></b></FONT><FONT COLOR="yellow">';
+	var b6='</FONT>';
+
+	m = "";
+	var disks = FloppyCtl.getAttached();
+	if(disks.length) {
+		for(i in disks) {
+			o=disks[i];
+			s+=b1+b2+i+b3+"["+o.id+"]"+b4+i+b5+o.FileName+b6+"  ";
+			}
+		}
+	if(s.length) Q.innerHTML = s;
+	}
+
+Q = GE("toucheson");
+if(Q!=null) {
+	Q.checked = Touch_Buttons;
+	touchShow(Touch_Buttons);
+	if(!Touch_Buttons) {
+	var O=GE("UKNC_canvas"),q=GE("options"),m=GE("dropfile");
+	var w=O.style,z=m.style;
+	w.width="880px"; w.height="600px";
+	z.width="894px"; z.height="630px";
+	q.style.top = "640px";
+	}
+	}
+
+
+if( Cpu.MC.GetWord00(54640,true)==6341 &&
+		Cpu.MC.GetWord00(54644,true)==492 &&
+			Cpu.MC.GetWord00(54648,true)==5505 ) {
+					// if Knight then substitute keys
+		if(!knightHackKeys) {
+			knightHackKeys=1;
+			keyboard.Subst_Key(32, 69); touch_Subst_Key(75, 69);
+			}
+	}
+}
+
+
+function userGames(file) {
+
+	var f = file || GE("usergames").value;
+	
+	Board.Reset();
+	FloppyCtl.detach();
+	
+	switch(f) {
+	case "gm40":
+		LOADDSK = [ "gm40a.zip", "gm40b.zip" ];
+		GoDisks();
+		return;
+	case "hwyenc.zip":
+		Board.LoadFromImage( UkncZagruzka,1 );
+	}
+	
+	
+	
+	if(f.length) Gbin.getUrl("files/"+f);	// read from url, see MAINs.js
+	
+	if(f=="welltris.zip") {
+		speed.setOptimize(0);
+	}
+	
+	knightHackKeys = 0;
+	
+	
+}
+
+
+function GoDisks() {
+	Gbin.getUrl("files/"+LOADDSK[0]);
+}
+
+
+
+function download_dsk(i) {
+
+    var disks = FloppyCtl.getAttached();
+    var a = GE("DOWNLOAD"+i), disk = disks[i];
+    var data = FloppyCtl.reSized819200(disk.bytesAll);
+    var file = new Blob([data], {type: "text/plain"});
+    a.href = URL.createObjectURL(file);
+    a.download = "nw_"+disk.FileName;
+    a.click();
+}
+
+function download_uknc() {
+
+    var a = GE("DOWNLUKNC");
+    var data = Board.SaveToImage();
+    var file = new Blob([data], {type: "text/plain"});
+    a.href = URL.createObjectURL(file);
+    a.download = "saved.uknc";
+    a.click();
+}
+
+
+function keysabout() {
+
+	alert("F1-F5, Shift+..., F11=UST, ESC=Break, Alt+... , RightCtrl=Rus/Lat, Ins,End,..., NumPads!" + CR +
+		CR + "This is a beta version, lots of work to do.");
+}
+
+</script>
+
+<div id="debug_div" style="position:absolute;left:30;top:300;width:800;height:350;visibility:hidden;background-color:white"></div>
+<div id="tckr_div" style="position:absolute;left:600;top:6;width:22;height:22;zIndex:500"></div>
+
+</body>
+
+</html>
