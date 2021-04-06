@@ -27,17 +27,21 @@ this.breakpoints = function(Processor) {
 	if(dbg.active) return true;
 	var pc = Processor.getPC();
 	if(Processor.isCpu) {	/* CPU */
-	//if( parseInt("163744",8)==pc ) return 1;
+	//	if( parseInt("...",8)==pc ) {
+	//		dbg.show();
+	//		return 1;
+	//		}
 		}
 	else
 		{	/* PPU */
 
 		// http://www.emuverse.ru/wiki/%D0%A3%D0%9A%D0%9D%D0%A6_ROM_disasm
 		//if( parseInt("100000",8)==pc ) return true;		/* Loader driver (starting) */
-		if( parseInt("104306",8)==pc ) {
-			//download_uknc();
-			//return true;		/* event on keyboard key pressed (ROM code) */
-			}
+		//if( parseInt("104306",8)==pc ) {			/* event on keyboard key pressed (ROM code) */
+			//trace.start();
+			//  trace.end();
+			//return true;		
+		//	}
 		
 		}
 	return false;

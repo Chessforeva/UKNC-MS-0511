@@ -11,6 +11,7 @@ Speed = function() {
 	var self = this;
 
 	var M = 1000000;
+	this.CpuMHZ = 8*M;	// CPU speed, should be, but is not.
 	
 	this.bunch = 250;	/* Bunch of cycles, looping settings. Related to 8MHz cycles per second */
 	this.fps = 160;		/* Looks much better than 25 */
@@ -23,6 +24,8 @@ Speed = function() {
 	
 	this.Ticks = 0;		/* real CPU + PPU cycles per second performed */
 	this.avg_Hz = 0;	/* average */
+	
+
 	
 	
 	/* OPTIMIZER */
@@ -98,6 +101,7 @@ Optimize=0
 	this.setOptimize = function(n) {
 			self.Optimize=n;
 			recalc();
+			sound.adjConstSpeed();
 			}
 			
 	function recalc() {			// recalculates loop values

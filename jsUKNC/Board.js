@@ -135,7 +135,7 @@ init();		// now
     Ppu.SetACLOPin(false);
 	
 	keyboard.reset();
-
+	cheats.reset();
 }
 
 //
@@ -363,6 +363,9 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 
 ======= */
 
+// Breakpoints are ok, can use. Just removed for better performance.
+
+// this is the most original with proper timings and good to compare log files
 /*bool*/ this.SystemFrame_ukncbtl = function()
 {
 	var frameticks = 0;
@@ -380,12 +383,12 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
         {
 			for(var i=0; i<28; i++) {
 				frExec[i].f();
-				if(dbg.breakpoints( frExec[i].p==0 ? Cpu : Ppu )) return false;
+				//if(dbg.breakpoints( frExec[i].p==0 ? Cpu : Ppu )) return false;
 				}
             if ((frameticks & 1) == 0)  // (frameticks % 2 == 0) Ppu extra ticks
 				{
                 frExec[1].f();
-				if(dbg.breakpoints(Ppu)) return false;
+				//if(dbg.breakpoints(Ppu)) return false;
 				}
         }
         else  // Have breakpoint, need to check
@@ -394,13 +397,13 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 				var o = frExec[i];
 				o.f();
 				if (o.p == 0) {
-					if(dbg.breakpoints(Cpu)) return false;
+					//if(dbg.breakpoints(Cpu)) return false;
 					if(Cpu.getPC() == Cpu.bp) {
 						return false;
 						}
 					}
 				else {
-					if(dbg.breakpoints(Ppu)) return false;
+					//if(dbg.breakpoints(Ppu)) return false;
 					if(Ppu.getPC() == Ppu.bp) {
 						return false;
 						}						
@@ -417,9 +420,11 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 			Tick32();
 			}
 
-        if (frameticks % 23 == 0) //AUDIO tick
+        if (frameticks % 23 == 0) //AUDIO tick %23
             DoSound();				// count channels too, if we want to save
-
+			
+		//OtherDevices();
+		
         frameticks++;
     }
     while (frameticks < 20000);
@@ -441,25 +446,18 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 
 /*bool*/ this.SystemFrame = function()
 {
-	if(!speed.Optimize) {
-			// this is the most original with proper timings and good to compare log files
-		return self.SystemFrame_ukncbtl();
-		}
-
 	// Now comes a very experimental hack on
 	// how to make UKNC run quite a smoothly.
 
 	var /*int*/ B = speed.bunch;	//	only 100 loop can be enough.
 	var OZ = speed.OZ;
-	
-    var /*const int*/ audioticks = 20286 / ( 22050/*SAMPLERATE*/ / 25);
 
 	var m,i,oz;
 	
     do
     {
 		TimerTick();
-		
+			
 		oz = OZ;
 		i=16;
 		
@@ -481,14 +479,14 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 				if(Cpu.Tick) Cpu.Tick--;
 				else {
 					Cpu.Execute();
-					if(dbg.breakpoints(Cpu)) return false;
+					//if(dbg.breakpoints(Cpu)) return false;
 					if(Cpu.bp && Cpu.getPC() == Cpu.bp) return false;
 					}
 
 				if(Ppu.Tick) Ppu.Tick--;
 				else {
 					Ppu.Execute();
-					if(dbg.breakpoints(Ppu)) return false;
+					//if(dbg.breakpoints(Ppu)) return false;
 					if(Ppu.bp && Ppu.getPC() == Ppu.bp) return false;
 					}
 				
@@ -522,6 +520,8 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 				//AUDIO tick (do not care, just play a game)
 			//if (B % 23 == 0) 
 			//	DoSound();
+			
+			//OtherDevices();
 
     }
     while (--B);
@@ -536,7 +536,7 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 function /*void*/ Tick50 ()
 {
     if ((Port.o177054 & 256 /*0400*/ ) == 0)		// 177054 - address space selected (ROM,RAM)
-        Ppu.TickEVNT();
+        { Ppu.TickEVNT(); scr.DRAW(); }
     if ((Port.o177054 & 512 /*01000*/ ) == 0)
         Cpu.TickEVNT();
 }
@@ -992,10 +992,10 @@ this.GetScannedKey = function() {
         res = (b22556 & 128 /*0200*/ ) ? (KEYB.RUS | KEYB.LOWERREG) : (KEYB.LAT | KEYB.LOWERREG);
         break;
     case 4092 /*07774*/ : //graph
-        res = KEYB.RUS;
+        res = KEYB.GRAF;
         break;
     case 4268 /*010254*/ : //control
-        res = KEYB.LAT;
+        res = KEYB.LAT | KEYB.UPR;
         break;
     default:
         res = KEYB.LAT;
@@ -1028,11 +1028,7 @@ function /*void*/ DoSound()
             g = 1;
     }
 
-	//    Not realized here, sounds poorly.
-    //if (g)
-    //    SoundGenCb(0x7fff, 0x7fff);
-    //else
-    //    SoundGenCb(0,0);
+    if(sound.On) sound.updateBit(g);
 }
 
 /*void*/ this.SetSound = function(/*uint16_t*/ val)
@@ -1046,10 +1042,143 @@ function /*void*/ DoSound()
 	freq.enable[4] = ((val & (1 << 8)) ? 1 : 0 );
 }
 
+/* NOT USED, but left */
+function OtherDevices() {
+
+	// If Cassette2 with driver is used and IDE drives connected, then .img can be attached in UKNCBTL
+	if(HardDrives.length) {
+       if (HardDrives[0] != null)
+            HardDrives[0].Periodic();
+        if (HardDrives[1] != null)
+            HardDrives[1].Periodic();
+		}
+	
+	if (0 /*Tape*/)
+        {
+            tapeBrasErr += tapeSamplesPerFrame;
+            if (2 * tapeBrasErr >= 20000)
+            {
+                tapeBrasErr -= 20000;
+
+                if (TapeReadCb != null)  // Tape reading
+                {
+                    var /*bool*/ tapeBit = TapeReadCb(1);
+                    if (Ppu.MC.TapeInput(tapeBit))
+                    {
+                        Timer.flags |= 32; /*040*/  // Set bit 5 of timer state: external event ready to read
+                    }
+                }
+                else if (TapeWriteCb != null)  // Tape writing
+                {
+                    var /*uint*/ value = (Ppu.MC.TapeOutput() ? 0xFFFFFFFF : 0);
+                    TapeWriteCb(value, 1);
+                }
+            }
+        }
+
+	if(0) {	/* Serial port (C2 slot)*/
+        if (0 /*SerialIn*/ && ticks % 416 == 0)
+        {
+            if ((Port.o176574 & 4 /*004*/ ) == 0)  // Not loopback?
+            {
+                var /*uint8_t*/ b = { value:0 };
+                if (SerialInCb(b))
+                {
+                    if (Cpu.MC.SerialInput(b.value) && (Port.o176570 & 64 /*0100*/ ))
+                        Cpu.VIRQ(7, 248 /*0370*/ );
+                }
+            }
+        }
+        if (0 /*SerialOut*/ && (ticks % 52 == 0))
+        {
+            if (serialTxCount > 0)
+            {
+                serialTxCount--;
+                if (serialTxCount == 0)  // Translation countdown finished - the byte translated
+                {
+                    if ((Port.o176574 & 4 /*004*/ ) == 0)  // Not loopback?
+                        SerialOutCb(/*uint8_t*/Port.o176576 & 255);
+                    else  // Loopback
+                    {
+                        if (Cpu.MC.SerialInput(/*uint8_t*/Port.o176576 & 255) && (Port.o176570 & 64 /*0100*/ ))
+                            Cpu.VIRQ(7, 248 /*0370*/ );
+                    }
+                    Port.o176574 |= 128; /*0200*/  // Set Ready flag
+                    if (Port.o176574 & 64 /*0100*/ )  // Interrupt?
+                        Cpu.VIRQ(8, 252 /*0374*/ );
+                }
+            }
+            else if ((Port.o176574 & 128 /*0200*/ ) == 0)  // Ready is 0?
+            {
+                serialTxCount = 8;  // Start translation countdown
+            }
+        }
+	}
+	if(0) {	/* Network (CA controller) */
+        if (0 /*NetworkInCb*/ && (ticks % 64 == 0))
+        {
+            if ((Port.o176564 & 4 /*004*/ ) == 0)  // Not loopback?
+            {
+                var /*uint8_t*/ b = { value:0 };
+                if (NetworkInCb(b))
+                {
+                    if (Cpu.MC.NetworkInput(b.value) && (Port.o176560 & 64 /*0100*/ ))
+                    {
+                        Cpu.VIRQ(9, 240 /*0360*/ );
+                    }
+                }
+            }
+        }
+        if (0 /*NetworkOut*/ && (ticks % 7 == 0))
+        {
+            if (networkTxCount > 0)
+            {
+                networkTxCount--;
+                if (networkTxCount == 0)  // Translation countdown finished - the byte translated
+                {
+                    if ((Port.o176564 & 4 /*004*/ ) == 0)  // Not loopback?
+                        NetworkOutCb(/*uint8_t*/Port.o176566 & 255);
+                    else  // Loopback
+                    {
+                        if (Cpu.MC.NetworkInput(/*uint8_t*/(Port.o176566 & 255)) && (Port.o176560 & 64 /*0100*/ ))
+                            Cpu.VIRQ(9, 240 /*0360*/ );
+                    }
+                    Port.o176564 |= 128; /*0200*/  // Set Ready flag
+                    if (Port.o176564 & 64 /*0100*/ )  // Interrupt?
+                    {
+                        Cpu.VIRQ(10, 244 /*0364*/ );
+                    }
+                }
+            }
+            else if ((Port.o176564 & 128 /*0200*/ ) == 0)  // Ready is 0?
+            {
+                networkTxCount = 4;  // Start translation countdown
+            }
+        }
+	}
+	
+    if (0 /*ParallelOut (to printer)*/)
+        {
+            if ((Port.o177102 & 0x80) == 0x80 && (Port.o177101 & 0x80) == 0x80)
+            {
+                // Strobe set, Printer Ack set => reset Printer Ack
+                Port.o177101 &= (~0x80);
+                // Now printer waits for a next byte
+            }
+            else if ((Port.o177102 & 0x80) == 0 && (Port.o177101 & 0x80) == 0)
+            {
+                // Strobe reset, Printer Ack reset => byte is ready, print it
+                ParallelOutCb(Port.o177100);
+                Port.o177101 |= 0x80;  // Set Printer Acknowledge
+                // Now the printer waits for Strobe
+            }
+        }
+
+}
 
 //////////////////////////////////////////////////////////////////////
 //
-// Emulator image format:
+// Emulator image (.uknc) format:
 //  Offset Size
 //     0    32 bytes  - Header
 //    32   128 bytes  - Board status
@@ -1163,18 +1292,22 @@ function rdImgChan(C, I, a) {
 	return n;
 }
 
-
+/* Load from .uknc file */
 
 /*void*/ this.LoadFromImage = function (/*uint8_t[] */ I8, spc)
 {
-	var I = [], t;
+	var I = [];
 
-	if(spc==1) {
-		I = I.concat( I8.slice(0,512) ).concat( UkncROM ).concat( I8.slice(519) );
+	if(spc==1) {			// .uknc_ is without default ROM 32kb, no need to hold everything
+		var j=0;
+		while(j<512) I[j]=I8[j++];
+		I = I.concat( UkncROM );
+		var k=j+7; j+=UkncROM.length;	// 7 bytes "UKNCROM" is a marker in that position
+		while(k<I8.length) I[j++]=I8[k++];
 		}
 	else
 		{
-		for(t in I8) I[t] = I8[t];		// a simple one-time convert from Uint8array
+		for(var t in I8) I[t] = I8[t];		// a simple one-time convert from Uint8array
 		}
 
 
@@ -1239,7 +1372,9 @@ function rdImgChan(C, I, a) {
 
 }
 
- // additional SAV file loader
+ // Additional SAV, GME file loader, works but not always for sure.
+ // Mostly copies memory blocks and takes time to load other parts from the disk.
+ // So, for small games only.
 
  this.LoadSAV = function (/*uint8_t[] */ I) {
 	

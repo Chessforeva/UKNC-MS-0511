@@ -4,7 +4,7 @@
 	UKNC screen is 640 x 288,  with a each-row-addressing with parameters.
 	Not a simplest video memory copying. Therefore is this SC object for faster updating.
 	SC is 307 rows x (640 px columns)
-	Bf is an [R,G,B] array for putImageData
+	RAM[0],[1],[2] byte holds [R,G,B] for 8 pixels, good for putImageData
 	
 */
 
@@ -130,30 +130,6 @@ var GrayColors = Rgb32( /*16 x 8 */ copy8(
   
   var colors = StandardRGBColors;
   this.colscheme = 0;  
-	
-  var monoColorRGB = [[0,0,0], [60,60,60],[250,250,250],[130,130,130]];
-  var Black=[0,0,0],Blue=[0,0,255],Green=[0,255,0],Red=[255,0,0],Yellow=[255,255,0],
-	Magenta=[255,0,255],Cyan=[0,255,255],White=[255,255,255],DarkRed=[139,0,0],
-	RedBrown=[128,64,0],Salad=[85,171,85],LightGreen=[128,255,128],
-	Violet=[238,130,238],VioletBlue=[138,43,226];
-  var fullColorRGB = [
-	Black, Blue, Green, Red,
-	Black, Yellow, Magenta, Red,
-	Black, Cyan, Blue, Magenta,
-	Black, Green, Cyan, Yellow,
-	Black, Magenta, Cyan, White,
-	Black, White, White, White, 
-	Black, DarkRed, RedBrown, Red,
-	Black, Salad, LightGreen, Yellow,
-	Black, Violet, VioletBlue, Magenta,
-	Black, LightGreen, VioletBlue, RedBrown,
-	Black, Salad, Violet, DarkRed,
-	Black, Cyan, Yellow, Red,
-	Black, Red, Green, Cyan,
-	Black, Cyan, Yellow, White,
-	Black, Yellow, Green, White,
-	Black, Cyan, Green, White 
-];
 
 	var CS,CX,gDATA;
   
@@ -320,13 +296,13 @@ function Scan()		// Redraw all screen
                     C = palettecurrent[v];  // 3-bit to 32-bit color
                 }
 				
-				var j = scale;		
+                var j = scale;		
                 while((j--)>0) {
 					gDATA.data[k++] = C[0];
 					gDATA.data[k++] = C[1];
 					gDATA.data[k++] = C[2];
 					gDATA.data[k++] = 255;
-					}
+                }
 
 
                 x -= scale;
@@ -389,13 +365,13 @@ function Scan()		// Redraw all screen
                     C = O.pal8[v];  // 3-bit to 32-bit color
                 }
 					
-				var j = O.scale;		
+                var j = O.scale;		
                 while((j--)>0) {
 					gDATA.data[k++] = C[0];
 					gDATA.data[k++] = C[1];
 					gDATA.data[k++] = C[2];
 					gDATA.data[k++] = 255;
-					}
+                }
 
                 // Shift to the next bit
                 b0 >>= 1;b1 >>= 1;b2 >>= 1;

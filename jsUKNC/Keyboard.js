@@ -3,13 +3,9 @@
   
 	Notes on the keyboard mapping table.
 	(remapped and replaced somehow, feels good for Basic editor)
-	
-	
-	The 1st is browser code, when keypress event happens.
-	After come UKNC codes to process:
-	  Latin, Latin when Shift pressed. The same are for Rus. Also graphics symbols.  
+	 
 	The original keyboard "Cuken" differs much, so tried to make it "Querty"-friendly.
-	Left Alt,Ctrl,Shift keys left without direct keypress actions, except some Alt+key cases.  
+
 */
   
 Keyboard = function()
@@ -17,9 +13,7 @@ Keyboard = function()
  var self = this;
  
  var /*boolean*/capsLocked = false;
- var /*boolean*/shiftPressed = false;
  var /*boolean*/rusAlf = false;
- var fHomeCtrl = 0;					// Home substituted Ctrl (УПР or СУ) flag (on,off)
   
  var keysbuffer = [];			// Queue to process keys, waiting to press
  var keyspressed = [];			// Queue to hold pressed keys
@@ -41,6 +35,27 @@ this.addKey =  function( code, set ) {
 	self.addKey(69,0);	// release Shift
 	self.addKey(71,0);	// release Fiks
 	}
+
+ var charTb = 0;
+ this.toSet = function(n) {
+	var f=0, keyReg = Board.GetKeyboardRegister();
+	if((keyReg & KEYB.GRAF)!=0) { self.setGraf(); f=1; }
+	else {
+		if(charTb==1 && (keyReg & KEYB.LAT)==0) { self.setAlf(); f=1; }
+		if(charTb==2 && (keyReg & KEYB.RUS)==0) { self.setAlf(); f=1; }
+		}
+	if(f && (--n)) setTimeout('keyboard.toSet('+n+')',500);
+	else charTb = 0;
+ }
+ 
+ this.setRus = function() {
+	charTb = 2; self.toSet(4);
+	}
+	
+ this.setLat = function() {
+	charTb = 1; self.toSet(4);
+	}
+
  this.setAlf = function() { 
 	self.addKey(71/*0107*/,1);	// + Fiks
 	self.addKey(70/*0106*/,1);	// Alf
@@ -49,13 +64,6 @@ this.addKey =  function( code, set ) {
 	}
 	
  this.setGraf = function() { 
-	self.addKey(71/*0107*/,1);	// + Fiks	
-	self.addKey(54/*0066*/,1);	// ГРАФ (Graf)
-	self.addKey(54,0);	// release Graf
-	self.addKey(71,0);	// release Fiks
-	}
- this.homeCtrl = function() { 
-	fHomeCtrl^=1;
 	self.addKey(71/*0107*/,1);	// + Fiks	
 	self.addKey(54/*0066*/,1);	// ГРАФ (Graf)
 	self.addKey(54,0);	// release Graf
@@ -134,8 +142,11 @@ this.addKey =  function( code, set ) {
    //45=Ins,46=Del
    
 		// this for games mostly, pure code by press
-  lats(36/*Home*/, 122);		// ПС or ПОМ
-	
+  lats(45/*Insert*/, 4073);		// UPR+S
+  lats(46/*Delete*/, 4076);		// UPR+T
+  lats(36/*Home*/, 121);		// SBROS
+  lats(35/*End*/, 4041);		// UPR+U
+  
   lats(37/*Left*/, 78 /*0116*/);
   lats(38/*Up*/, 108 /*0154*/);
   lats(39/*Right*/,91 /*0133*/);
@@ -156,13 +167,14 @@ this.addKey =  function( code, set ) {
   lats(9/*Tab*/,150/*TAB*/);
   
   //16=Shift,17=Ctrl,18=Alt,,20=CapsLock,
+  lats(16, 69);		// shift
+  lats(17, 38);		// ctrl
   
    /* 19=Pause,Break, 27=ESC */
   lats(19, 2121);		// clear screen
   lats(27, 4);			// STOP
 
-  // Graf 0066
-  lats(13/*Enter*/, 107 /*0153*/); 
+  lat(13/*Enter*/, 107 /*0153*/, 4023); 
   lats(32/*Space*/, 75 /*0113*/);
   
   lats(65/*A*/, 58 /*0072*/); lats(66/*B*/, 62 /*0076*/); lats(67/*C*/, 40 /*0050*/);
@@ -233,7 +245,7 @@ if(navigator.userAgent.indexOf("Firefox") >= 0)
   AltK(57/*9*/,2012/*014 K9*/);
   AltK(48/*0*/,2013/*015 K10*/);
   
-  AltK(122/*F11*/,122);	// on Alt ПОМ  
+  AltK(122/*F11*/,122);	// on Alt ПОМ (or ПС)
   
   /* cyrillic*/
   for(var i=0;i<32;i++) rus(m[i], u[i]);		// without ё
@@ -318,27 +330,12 @@ init();
 	 if(e.location==2) self.addKey(69,1);	/* Right shift is with code */
      return -1;
     case 17: /*Ctrl*/
-	  if(e.location==2) self.setAlf();	/* Right Ctrl is Alf (LAT/RUS swap) with Fiks */
+	  self.addKey(38,1);
 	  return -1;
     case 18: /*Alt*/
 	  return -1
-    case 20:
+    case 20:	/* CAPS */
       self.Capsed();
-      return -1;
-	case 45:
-      self.setGraf();		/* Insert sets Graf */
-      return -1;
-	case 46:/*Del*/
-      self.addKey(71,1);self.addKey(71,0);		// Del = ФИКС (Fiks)
-      return -1;
-	case 33:/*PgUp*/
-      self.addKey(70,1);self.addKey(70,0);		// Alf (without fiks)
-      return -1;
-	case 34:/*PgDn*/	
-      self.addKey(54,1);self.addKey(54,0);		// Graf (without fiks)
-      return -1;
-	case 35:/*End*/		
-      self.addKey(69,1);self.addKey(69,0);			// Shift short press
       return -1;
 	case 123: /*F12*/
 	  reset = (++reset)%2;
@@ -432,16 +429,13 @@ this.processNextKey = function() {
 	if(keysbuffer.length) {			// process next keys - press it
 		var K = keysbuffer.shift();
 		
-
 			var i = keyspressed.lastIndexOf(K.keycode);
 			if((i<0) || ( K.pressed != keyspressed[i].pressed )) {
 					Board.KeyboardEvent(K.keycode,K.pressed);
 					lastKEY = K.keycode;
-					keyspressed.push(K.keycode,K.pressed);
+					keyspressed.push(K.keycode,K.pressed);					
+					//LOG(K.keycode + ' ' + K.pressed);
 				}
-
-		//keyspressed.push(K.keycode,K.pressed);
-		//LOG(K.keycode + ' ' + K.pressed);
 		}
 
 }
@@ -451,5 +445,72 @@ this.Subst_Key = function( onekey, code ) {
 	subst_keys.push( { f: onekey, uknc: code } );
 }
 
+	/* VIRTUAL KEYBOARD */
+
+ var vkb = []; // Keyboard key mapping
+ var uknc_scancd = [
+	8 /*0010 K1*/, 9 /*0011 K2*/, 10 /*0012 K3*/, 12 /*0014 K4*/, 13 /*0015 K5*/,
+	122 /*0172 POM*/, 106 /*0152 UST*/, 105 /*0151 ISP*/, 121 /*0171* SBROS (RESET)*/,4 /*0004 STOP*/,
+	6 /*0006 AR2*/, 7 /*0007 ; + */, 24 /*0030 1 */, 25 /*0031* 2 */, 26 /*0032 3 */,
+	11 /*0013 4 */, 28 /*0034 5 */, 29 /*0035 6 */, 14 /*0016 7 */, 15 /*0017 8 */,
+	127 /*0177 9 */, 126 /*0176 0 */, 125 /*0175* - = */, 123 /*0173 / ? */, 90 /*0132 BS*/,
+	22 /*0026 TAB*/, 23 /*0027 É J*/, 40 /*0050 Ö C*/, 41 /*0051 Ó U*/, 42 /*0052 Ź K*/,
+	27 /*0033 Å E*/, 44 /*0054 Ķ N*/, 45 /*0055 Ć G*/, 30 /*0036 Ų [*/, 31 /*0037 Ł ]*/,
+	111 /*0157 Ē Z*/, 110 /*0156 Õ H*/, 109 /*0155 Ś*/, 124 /*0174 : "*" */, 
+	38 /*0046 UPR*/, 39 /*0047 Ō F*/, 56 /*0070 Ū Y*/, 57 /*0071 Ā W*/, 58 /*0072 Ą A*/,
+	43 /*0053 Ļ P*/, 60 /*0074 Š R*/, 61 /*0075 Ī O*/, 46 /*0056 Ė L*/, 47 /*0057 Ä D*/,
+	95 /*0137 Ę V*/, 94 /*0136 Ż Backslash*/, 93 /*0135 . ">" */,
+	70 /*0106 ALF*/, 54 /*0066 GRAF*/, 55 /*0067 ß Q*/, 72 /*0110 × ^*/, 73 /*0111 Ń S*/, 
+	74 /*0112 Ģ*/, 59 /*0073 Č I*/, 76 /*0114 Ņ*/, 77 /*0115 Ü X*/, 62 /*0076 Į B*/,
+	63 /*0077 Ž @*/, 79 /*0117 , "<" */,
+	69 /*0105 LShift */, 71 /*0107 FIKS*/, 75 /*0113 Space bar*/, 69 /*0105 RShift*/,
+	78 /*0116 Left*/, 108 /*0154 Up*/, 92 /*0134 Down*/, 91 /*0133 Right*/,
+	107 /*0153 ENTER*/,
+	89 /*0131 + NumPad*/, 21 /*0025 - NP*/, 5 /*0005 "," NP*/,
+	85 /*0125 7 NP*/, 101 /*0145 8 NP*/, 117 /*0165 9 NP*/,
+	88 /*0130 4 NP*/,  104 /*0150 5 NP*/, 120 /*0170 6 NP*/,
+	87 /*0127 1 NP*/, 103 /*0147 2 NP*/, 119 /*0167 3 NP*/,
+	86 /*0126 0 NP*/, 102 /*0146 . NumPad*/, 118 /*0166 ENTER NumPad*/];
+ 
+ this.getNumpadCodes = function() { return uknc_scancd.slice(73); }	// Last 15 codes
+ 
+ function initVKB() {
+	var p = [/*1 K1*/5,27,10,78,121,121,122,122,118,/*2 POM*/3,926,10,78,121,121,120,
+	/*3 SBR*/2,1300,12,76,119,121,/*4 AP2*/14,23,99,78,80,82,81,80,82,82,79,82,80,80,80,83,80,81,
+	/*5 BS*/1,1164,99,79,120,/*6 TAB*/14,21,180,77,121,82,81,81,80,82,79,83,80,81,82,80,81,82,
+	/*7 UPR*/13,21,261,79,138,81,83,81,80,82,82,81,81,81,81,82,99,
+	/*8 ALF*/12,18,341,81,100,83,83,80,80,83,83,81,82,80,82,98,/*9 LShift*/4,15,423,81,164,104,590,163,
+	/*10 Arrows*/1,1040,344,160,82,/*11*/1,1122,345,78,81,/*12*/1,1122,424,80,83,/*13*/1,1204,344,160,83,
+	/*14 Enter*/1,1152,186,157,126,/*15 Numpad*/3,1300,102,79,80,81,81,/*16*/3,1300,181,79,81,80,79,
+	/*17*/3,1300,262,79,83,79,82,/*18*/3,1300,344,78,84,79,79,/*19*/3,1300,424,77,84,80,81];
+	
+	var i=0,j=0;
+	while(i<p.length) {
+		var c = p[i++], X = p[i++], Y = p[i++], dY = p[i++];
+		while(c--) {
+			var X1 = X+p[i++], Y1 = Y+dY;
+			vkb.push({ x0:X, y0:Y, x1:X1, y1:Y1, i:j, cd:uknc_scancd[j++] });
+			X=X1;
+		}
+	}
+ }
+ 
+  this.holdkey = function(o) {
+	return (( (o.cd==6) /*AR2*/ || (o.cd==38) /*UPR*/ || (o.cd==70) /*ALF*/ ||
+		(o.cd==54)/*GRAF*/ || (o.cd==69 && o.i==64) /*LShift*/ || (o.cd==71) /*FIKS*/ ) ? o.cd : 0);
+  }
+
+ 
+  this.getVKey = function(x,y) {
+	for(var i=0; i<88; i++) {
+		var o = vkb[i];
+		if((o.x0+3)<x && (o.x1-3)>x && (o.y0+3)<y && (o.y1-3)>y) return vkb[i];
+	}
+	return null;
+  }
+
+
+	initVKB();
+	
 	return this;
 }

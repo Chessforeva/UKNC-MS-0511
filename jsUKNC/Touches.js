@@ -1,6 +1,7 @@
 ﻿
 // keyboard on buttons
 // touch things
+// (not a best way to do, but it works somehow)
 
 
 TOUCH_ = ('ontouchstart' in document.documentElement);
@@ -10,19 +11,23 @@ var EVENT = { type: "", keyCode: 0, which:0, location:0,
  preventDefault: function() {} , stopPropagation: function() {} }; 
  
 KBUT_ = [];
-			
+
+NUMPAD = false;
+
+var TouchesNow = 0;
+
 function AddKeyButtons()
 {
-    addKey( "Esc",0, 4,  690,10, 90,90 );
-    addKey( "Enter",0, 107,  790,10, 180,90 );
+    addKey( "Esc",0, 4,  680,10, 90,90 );
+    addKey( "Enter",0, 107,  780,10, 180,90 );
     
-    addKey( "Left",0, 78,  680,130, 100,220 );
-    addKey( "Up",0, 108,  786,116, 100,110 );
-    addKey( "Down",0, 92,  786,240, 100,110 );
-    addKey( "Right",0, 91,  892,130, 100,220 );
+    addKey( "Left",0, 78,  670,130, 100,220 );
+    addKey( "Up",0, 108,  776,116, 100,110 );
+    addKey( "Down",0, 92,  776,240, 100,110 );
+    addKey( "Right",0, 91,  882,130, 100,220 );
     
-    //addKey( "Delete",0, 46,  932,386, 60,60 );
-    addKey( "Space",0, 75,  680,386, 240,90 );
+    addKey( "Shift",0, 69,  840, 386, 140,90 );
+    addKey( "Space",0, 75,  670,386, 160,90 );
 }
 
 KBF_ = [];
@@ -110,17 +115,25 @@ function touchLoads()
    }
    O.style.zIndex = 5555;
   }
-  
+  NumpadLoads();
   }
 }
 
 function touchShow(to)
 {
-  for(var i in KBUT_)
+ var c=''+to+" "+NUMPAD;		// not to redraw too much
+ if(TouchesNow!=c) {
+ 
+ var Q = GE("numpad");
+ Q.style.visibility = (to && NUMPAD ? "visible": "hidden");
+ ShowNumpad(to && NUMPAD);
+ for(var i in KBUT_)
   {
    var O = GE("kButt"+KBUT_[i]);
-   O.style.visibility = (to ? "visible" : "hidden");
+   O.style.visibility = (to && (!NUMPAD) ? "visible" : "hidden");
   }
+  TouchesNow = c;
+ }
 }
 
 function TouchClick(e)
@@ -160,3 +173,51 @@ function touch_subst_get(c) {		// substitute one uknc keycode to other
 	return c;
 }
 
+/* NUMPAD virtual keyboard */
+
+var NmpCd = [];
+
+function divByPos(v,h) {
+	if(!NmpCd.length) NmpCd = keyboard.getNumpadCodes();
+	return "nump_" + NmpCd[(v*3)+h].toString();
+}
+
+function crea_Numpad() {
+ for(var v=0; v<5; v++)
+  for(var h=0; h<3; h++) {
+	var x = 680+(h*92) + ((h>0) ? (h-1)*7 : 0);
+	var y = 14+(v*92) + ((v>0) ? (v-1)*7 : 0);
+	document.write('<div id="' + divByPos(v,h) + '" style="position:absolute;left:' +
+		parseInt(x) +';top:' + parseInt(y) + ';width:84;height:84;visibility:visible;"></div>');
+	}
+}
+
+function NumpadLoads()
+{
+ for(var v=0; v<5; v++)
+  for(var h=0; h<3; h++)
+  {
+   var O = GE( divByPos(v,h) );
+   if(TOUCH_)
+   {
+   O.addEventListener("touchstart", TouchClick, false);
+   O.addEventListener("touchmove", DummyEv, false);
+   O.addEventListener("touchend", TouchUp, false);
+   }
+  else
+   {
+   O.addEventListener("mousedown", TouchClick, false);
+   }
+   O.style.zIndex = 5556;
+  }
+  
+}
+
+function ShowNumpad(on) {
+ for(var v=0; v<5; v++)
+  for(var h=0; h<3; h++)
+  {
+   var O = GE( divByPos(v,h) );
+   O.style.visibility = (on ? "visible" : "hidden");
+  }
+}

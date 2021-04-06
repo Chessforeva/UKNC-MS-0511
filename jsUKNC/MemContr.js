@@ -1072,7 +1072,7 @@ init1();	// now
     case 65037 /*0177015*/ :
        Port.o177014 &= 255;
        Port.o177014 |= word;
-        Board.SetRAMByte(2,Port.o177010, ((word >> 8) & 255));
+        Board.SetRAMByte(2,Port.o177010, ((word >>> 8) & 255));
         break;
     case 65038 /*0177016*/ :
     case 65039 /*0177017*/ :
@@ -1400,6 +1400,7 @@ init1();	// now
         PU.MemoryError(address);
         break;
     }
+
 }
 
 

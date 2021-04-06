@@ -231,9 +231,11 @@ var UKNCIMAGE = {
 };
 
 var KEYB = {
-	RUS: 0x1,
-	LAT: 0x2,
-	LOWERREG: 0x10
+	RUS: 1,
+	LAT: 2,
+	GRAF: 4,
+	LOWERREG: 8,
+	UPR:16		// Ctrl
 };
 
 function OCT(n) {
@@ -290,7 +292,7 @@ function waddI8 ( I8, o, value ) {
 }
 
 
-// Bus devices
+// Bus devices (NOT USED, but known)
 
 var BusDevices = {
 

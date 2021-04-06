@@ -1,7 +1,4 @@
 ﻿
-
-
-
 //--------------------
 //  on loaded
 //--------------------
@@ -20,7 +17,7 @@ function FPSloop( onetime )
   if(!dbg.active) {
     
 		// let the CPU, PPU perform a bunch of cycles
-	if(!Board.SystemFrame()) {
+	if(!( speed.Optimize ? Board.SystemFrame() : Board.SystemFrame_ukncbtl() )) {
 		Cpu.bp = 0;
 		Ppu.bp = 0;		// returning from breakpoint
 		dbg.show();
@@ -40,15 +37,16 @@ function FPSloop( onetime )
 /* File to process */
 Gbin.onGot=function(filename, bytes)
 	{
+	cheats.FileName = filename;			// save file name
 	var f = filename.toLowerCase();
 	if(f.indexOf(".rom")>0) {
 		Board.LoadROM(bytes);
 		}
 	if(f.indexOf(".uknc")>0) {
-		Board.LoadFromImage( bytes );
+		Board.LoadFromImage( bytes, ( f.indexOf(".uknc_")>0 ? 1 :0 ) );
 		scr.DRAW();
 		}
-	if(f.indexOf(".sav")>0 || f.indexOf(".gme")>0) {
+	if(f.indexOf(".sav")>0 || f.indexOf(".gme")>0 || f.indexOf(".gam")>0) {
 		// Load image of saved state of a booted OS that was loaded from a floppy disk 
 		Board.LoadFromImage( UkncSAVcase,1 );
 		Board.LoadSAV( bytes );		// and overwrite memory in addresses 000000 - 000777
@@ -72,7 +70,7 @@ function keyact(e){
 var kwas=0;		// to prevent default browser action
 
 
-if(e.keyCode==76 && e.ctrlKey) Cheatings.livesfinder();
+if(e.keyCode==76 && e.ctrlKey) cheats.livesfinder();
 else if(e.keyCode==13 && (e.altKey || e.ctrlKey)) FullScreen=1;
 else {
 
@@ -96,15 +94,12 @@ if(kwas) {
 
 }
 
-
-
-
 // does fake key press action
 // f=1 touch case, do not release
 function pushKey(n,f) {
 
  keyboard.addKey(n,1);
- if(!f) setTimeout('keyboard.addKey('+n+',0)',450);
+ if(!f) popKey(n);
 
 }
 
