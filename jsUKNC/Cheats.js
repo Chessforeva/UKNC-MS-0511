@@ -64,7 +64,7 @@ Cheats = function(){
 	for(var i in lv_cht) {
 		var o = lv_cht[i];
 		RAM[o.plane][o.addr] = o.val;
-		// cheating'
+		// cheating
 		}
  }
  
@@ -96,16 +96,7 @@ if( self.FileName=="puckman.uknc" || RAM[0][65535]==207 ) {
 	RAM[0][65535]=207;
 	//RAM[1][7771] = 7;	// hack lives
 	}
-	
-//	 RAM[1][10089] = 8;	// hack lives
-//	}
-	
-//	arkan
-//	 RAM[2][9062] = 109;	// hack lives
-//	}
 
- /* Puckman */
-//RAM[1][7771] = 7;
 	
  livescheat();	// lives cheating tool
 

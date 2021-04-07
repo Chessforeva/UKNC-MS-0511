@@ -292,8 +292,9 @@ Board.LoadFromImage( UkncBasic,1 );
 
 function loaded() {
  var D=GE("dropfile"), O=GE("UKNC_canvas"), o=GE("debug_div"), v=GE("kbimage"), y=GE("options");
- var d=GE("Speed_opts"), w=GE("numpad");
- if(D==null || O==null || o==null || v==null || y==null || d==null || w==null) setTimeout('loaded()',999);
+ var d=GE("Speed_opts"), w=GE("numpad"), z=GE("keys_hint");
+ if(D==null || O==null || o==null || v==null ||
+	y==null || d==null || w==null || z==null) setTimeout('loaded()',999);
  else
   {
 	touchLoads();
@@ -313,6 +314,8 @@ function loaded() {
 	if(i>0) setTimeout('userGames("'+href.substr(i+5)+'")',2000);
 	
 	v.addEventListener( (TOUCH_ ? "touchstart" : "mousedown"), kbPressed, false);
+	
+	z.style.zIndex = -8000;
   }
 }
 
@@ -643,7 +646,7 @@ function closeFullscreen() {
 <div id="numpad" style="position:absolute;left:670;top:4;width:227;height:376;visibility:hidden;" onmousedown="preventaction(event)">
 <img src="numpad.png" id="vnumpad" width="295" height="489" onmousedown="preventaction(event)">
 </div>
-<div id="keys_hint" style="position:absolute;left:690;top:500;width:200;height:50;background-color:grey">
+<div id="keys_hint" style="position:absolute;left:690;top:500;width:200;height:100;background-color:grey">
 <font color="white" size="2">
 Stop=Esc, AR2=Shift+Esc, Alt,UPR=LCtrl, LShift+..., Caps, <br>F1-F10=Alt+[1..0],  
 Break,Ins,Del,Home,End, UST=F11,Shift+F11, F1-F5+Shift,<br>
