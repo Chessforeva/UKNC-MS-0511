@@ -543,19 +543,25 @@ function /*void*/ EncodeTrackData(/*uint8_t[]*/pSrc)
   
 	FlushChanges();
   
-	var L = 819200, a = bytes, l = bytes.length, i, c, q, trunc=true;
-	if(l>=L) {
+	var A, L = 819200, a = bytes, l = bytes.length, i, c, q, trunc=true;
+	if(l>L) {
 	 c = a[L-1];	// last symbol
 	 for(i=L;i<l && trunc;i++) {
 		q=a[i]; if(q!=0&&q!=255&&q!=c) trunc=false;
 		}
 	 if(trunc) {
-		var A = new Uint8Array(L);
+		A = new Uint8Array(L);
 		for(i=0;i<L;i++) A[i]=a[i];
 		return A;
 		}
-	}	
-	return bytes;
+	  A = new Uint8Array(l);
+	  for(i=0;i<l;i++) A[i]=a[i];
+	  return A;
+	}
+	A = new Uint8Array(L);
+	for(i=0;i<l;i++) A[i]=a[i];
+	while(i<L) A[i++]=0;
+	return A;
   }
   
 

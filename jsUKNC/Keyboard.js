@@ -163,8 +163,8 @@ this.addKey =  function( code, set ) {
   lat(57/*9*/,127 /*0177*/,15/*(*/);
   lat(48/*0*/,126 /*0176*/,127/*)*/);
 
-  lat(8/*Backspace*/,1218/*BS*/, 2109);
-  lats(9/*Tab*/,150/*TAB*/);
+  lats(8/*Backspace*/,90 /*BS*/);
+  lats(9/*Tab*/,22/*TAB*/);
   
   //16=Shift,17=Ctrl,18=Alt,,20=CapsLock,
   lats(16, 69);		// shift
@@ -172,7 +172,7 @@ this.addKey =  function( code, set ) {
   
    /* 19=Pause,Break, 27=ESC */
   lats(19, 2121);		// clear screen
-  lats(27, 4);			// STOP
+  lat(27, 4, 1006);		// STOP, AP2 on shift
 
   lat(13/*Enter*/, 107 /*0153*/, 4023); 
   lats(32/*Space*/, 75 /*0113*/);
@@ -338,7 +338,7 @@ init();
       self.Capsed();
       return -1;
 	case 123: /*F12*/
-	  reset = (++reset)%2;
+	  reset = (++reset)%3;
 	  if(reset==2) Board.Reset();		// not needed, but works ok too
 	  else {
 		Board.LoadFromImage( (reset==1 ? UkncZagruzka : UkncBasic),1 );
