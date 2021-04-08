@@ -45,6 +45,7 @@ Gbin.onGot=function(filename, bytes)
 	if(f.indexOf(".uknc")>0) {
 		Board.LoadFromImage( bytes, ( f.indexOf(".uknc_")>0 ? 1 :0 ) );
 		scr.DRAW();
+		cheats.gamesMenus();
 		}
 	if(f.indexOf(".sav")>0 || f.indexOf(".gme")>0 || f.indexOf(".gam")>0) {
 		// Load image of saved state of a booted OS that was loaded from a floppy disk 

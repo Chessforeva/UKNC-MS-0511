@@ -63,8 +63,6 @@ Soviet school computer during 80s-90s.
 <script src="Cheats.js"></script>
 
 
-
-
 <script type="text/javascript">
 
 var Touch_Buttons = true || (TOUCH_ || MOBILE_);	/* to enable-disable */
@@ -257,9 +255,8 @@ return false;
 };
 
 
-
 //-----------------------
-// The main BK global 
+// The main UKNC global 
 //-----------------------
 //
 var cheats = new Cheats();
@@ -650,6 +647,69 @@ function closeFullscreen() {
 	FullScreen=0;
 }
 
+/* Menus for some cases, no need to write "RUN MZ1:GAME.SAV[enter]" */
+var GameSelected = 0;	// selected game, or dsk:name
+
+function games_menu( Nr ) {
+ var g=".GME", s=".SAV", w=".GAM", P="PIFPAF", C="CASTLE", K="POKER", G="GOBLIN", R="REVERS",
+  H="CHESS", S="STALK", F="SHERIF", L="LAND", N="KNIGHT", p="POCKER", l="LODE", c="HELIC", e="PACM",
+  T="TETRIS", M="GMARS", X="GXONIX", m="MINE", r="TETRGR", D="DIGGER", A="GARDEN", B="BOA", t="NEWTET",
+  i="PIRAM", k="PIKNIK", x="KING", X="PAIR", V="VERT", u="MKLAD", U="SPION", q="KLAD", W="SHER", I="UFO";
+ var Da="~~~ on disk MZ", Db=": ~~~", D0 = Da+"0"+Db, D1=Da+"1"+Db;
+ var m=[ [ D0, D+g, L+g, H+g, "SWAR"+g, q+g, "BLDR"+g, m+g, "COSM"+g, C+g, P+g, T+g, "MISION"+g,
+ e+"1"+g, e+"2"+g, A+g, x+g, "MUSTET"+g, B+g, "BOLDER"+g, c+g, "JUJA"+g, G+g, X+g, M+g, S+g, R+g,
+ "RALLI"+g, I+g, "PASIAN"+g, K+g, D1, x+s, H+s, k+w, K+s, S+s, X+s, "SAPER"+s, "GBL"+s, I+s, c+s,
+ P+w, V+s, L+"M"+w, "PATRUL"+s, S+w, "FISH"+s, B+s, "MARS"+s, "FE"+s, G+s, X+s, "SP15"+s,
+ "KOSMOS"+w, "IBMCHR"+s, m+"1"+s, T+s, D+s, "SP21"+s, "DESS"+s, "CAT"+w, "SAPPER"+w, N+s, u+s,
+ R+s, "LOTOS"+s, p+s, t+s, "KOSTI"+s, U+s, m+s, i+s, r+w, "HANOJ"+s ],
+  [ D0, "BARMEN"+w, B+w, "CAT400"+w, "COPTER"+w, "EXPRES"+w, A+w, M+w, G+w, X+w, "HWE62"+w, N+w,
+ "KOSTI"+w, "LABRN1"+w, l+"1"+w, l+"2"+w, l+"3"+w, u+w, t+w, P+w, k+w, i+w, p+w, "SPACEM"+w, U+w,
+ "STALKB"+w, "STURM"+w, "TENIS"+w, r+w, "TGDEMO"+w, I+w, D1, "WERT"+s, F+s, P+s, c+s, "L"+L+s, L+"2"+w,
+ L+"3"+w, "LND"+s, F+w, P+w, q+"2"+s, L+"M"+s, C+s, "SAD"+s, W+"MZ"+s, V+s, L+"0"+w, L+"1"+w, L+"2"+s,
+ L+"M"+w, C+w, A+w, q+s, L+"2U"+s, W+"2"+s, L+"3"+s ] ];
+ 
+	var O = GE("games_menu");
+	if(O!=null) {
+		GameSelected = 0;
+		var s = '<input style="font-size:18px" type="button" value="[x]" onclick="games_menu_close()"> ';
+		s += '<select style="font-size:22px" id="gm_menu" title="Select game file" onchange="game_selected()">';
+		var M = m[Nr], mz="";
+		for(var i in M) {
+			var F = M[i], a=F.indexOf(":"), g = mz + F;
+			if(a>=0) { mz = F.substr(a-3,4); g = ""; }
+			s+= '<option title="Run the file" value="' + g + '">' + F + '</option>';
+			}
+		s+= '</select>  <input type="button" style="font-size:18px" value="Run" onclick="game_run()">';
+		O.innerHTML = s;
+		O.style.visibility = "visible";
+		O.style.zIndex = 9200;
+ 	}
+}
+
+function game_selected() { GameSelected = GE("gm_menu").value; }
+
+function game_run() {
+	var v = GameSelected;
+	if(v && v.length) { GameSelected = "RUN " + v + CR; game_kb_press(); }
+	games_menu_close();
+}
+
+function games_menu_close() {
+	var O = GE("games_menu");
+	O.innerHTML = '';
+	O.style.visibility = "hidden";
+	O.style.zIndex = -9000;
+} 
+
+function game_kb_press() {		// Process game name by letters
+	var v = GameSelected;
+	if(v.length) {
+	 setTimeout('pushASCIIkey(' + v.charCodeAt(0) + ')', 100 );	// in Touches.js
+	 GameSelected = v.substr(1);
+	 setTimeout('game_kb_press()', 500 );
+	}
+}
+
 </script>
 
 <div id="debug_div" style="position:absolute;left:30;top:300;width:800;height:350;visibility:hidden;background-color:white"></div>
@@ -667,6 +727,9 @@ Space, Arrows, NumKeys, Rshift,<br>guess and try...
 <script type="text/javascript">
 crea_Numpad( 770/*left_x*/, 14/*top_y*/);
 </script>
+
+<div id="games_menu" style="position:absolute;left:260;top:60;width:420;height:300;visibility:hidden;">
+</div>
 
 </body>
 

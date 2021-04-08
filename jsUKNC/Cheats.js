@@ -102,6 +102,12 @@ if( self.FileName=="puckman.uknc" || RAM[0][65535]==207 ) {
 
  }
  
+ this.gamesMenus = function() {	// activate menu for loaded disks
+
+ if( self.FileName == "bstgames.uknc_" ) games_menu(0);
+ if( self.FileName == "gmL1.uknc_" ) games_menu(1);	
+ }
+ 
   // ...cheat like this
  setInterval('cheats.hack()',8000);
 

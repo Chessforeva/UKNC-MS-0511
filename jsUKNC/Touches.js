@@ -88,7 +88,6 @@ function addKey(n,f,c,x,y,w,h)
  document.write(s);
 }
 
-//function GE(id) { return document.getElementById(id); }
 function DummyEv(e) { e.stopPropagation(); e.preventDefault(); return false; } 
 
 function touchLoads()
@@ -220,4 +219,29 @@ function ShowNumpad(on) {
    var O = GE( divByPos(v,h) );
    O.style.visibility = (on ? "visible" : "hidden");
   }
+}
+
+// for Games to start
+function pushASCIIkey(a) {
+ switch(a) {
+ case 58: //:
+	pushKey(124); break;
+ case 46: //.
+	pushKey(102); break;
+ case 13: //Enter
+	pushKey(118); break;
+ default:
+	pressASCIIkey(a);
+	setTimeout('releaseASCIIkey('+a+')',200);
+  }
+ }
+	
+function pressASCIIkey(a) {
+	EVENT.keyCode = EVENT.which = a;
+	keyboard.keyHit(EVENT);
+}
+
+function releaseASCIIkey(a) {
+	EVENT.keyCode = EVENT.which = a;
+	keyboard.keyRelease(EVENT);
 }

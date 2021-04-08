@@ -63,13 +63,6 @@ var PU;   // PU attached (CPU or PPU)
 
 var offset = 0;		// TA result
 
-function /*void*/ AttachDevices(/*CBusDevice*/ Devices)
-{
-
-    Devices[0] = null;
-    DeviceCount = deviceCount;
-
-}
 
 //
 // dbg case, no ports
