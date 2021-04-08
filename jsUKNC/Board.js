@@ -423,7 +423,7 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
         if (frameticks % 23 == 0) //AUDIO tick %23
             DoSound();				// count channels too, if we want to save
 			
-		//OtherDevices();
+		OtherDevices();
 		
         frameticks++;
     }
@@ -1045,8 +1045,10 @@ function /*void*/ DoSound()
 /* NOT USED, but left */
 function OtherDevices() {
 
+ if(0) {		// Not developed
+
 	// If Cassette2 with driver is used and IDE drives connected, then .img can be attached in UKNCBTL
-	if(HardDrives.length) {
+	if(0) {
        if (HardDrives[0] != null)
             HardDrives[0].Periodic();
         if (HardDrives[1] != null)
@@ -1156,8 +1158,9 @@ function OtherDevices() {
             }
         }
 	}
-	
-    if (0 /*ParallelOut (to printer)*/)
+ }
+
+    if ( (sound.On) /*ParallelOut (to printer)*/)
         {
             if ((Port.o177102 & 0x80) == 0x80 && (Port.o177101 & 0x80) == 0x80)
             {
@@ -1168,7 +1171,14 @@ function OtherDevices() {
             else if ((Port.o177102 & 0x80) == 0 && (Port.o177101 & 0x80) == 0)
             {
                 // Strobe reset, Printer Ack reset => byte is ready, print it
-                ParallelOutCb(Port.o177100);
+                //ParallelOutCb(Port.o177100);
+				
+				// Included for possible Covox tests, but did not find any sample
+				if(sound.On) {
+					sound.covox = true;
+					sound.updateCovox(Port.o177100);
+					}
+					
                 Port.o177101 |= 0x80;  // Set Printer Acknowledge
                 // Now the printer waits for Strobe
             }

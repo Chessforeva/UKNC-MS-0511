@@ -6,7 +6,16 @@
 </head>
 <body onload="loaded()" background="uknc_bg.jpg">
 
-<div id="bg" style="width:980px;height:820px;position:absolute;top:0px;left:0px;" onmousedown="preventaction(event)"></div>
+<style>
+.disSel{ -webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+outline: 0;
+}
+.Ckbx { width: 20px; height: 20px; }
+.dbg0 { font-family: Courier; font-size:14px }
+</style>
+<div id="bg" class="disSel" style="width:980px;height:820px;position:absolute;top:0px;left:0px;" onmousedown="preventaction(event)"></div>
 
 <!--
 UKNC Elektronika MS-0511 emulator HTML5 javascript
@@ -53,15 +62,7 @@ Soviet school computer during 80s-90s.
 <script src="Touches.js"></script>
 <script src="Cheats.js"></script>
 
-<style>
-.disSel{ -webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-outline: 0;
-}
 
-.dbg0 { font-family: Courier; font-size:14px }
-</style>
 
 
 <script type="text/javascript">
@@ -82,7 +83,7 @@ var WindoW = winWiHi();
 
 <!-- Canvas UKNC_canvas -->
 <div class="disSel" id="dropfile" style="position:absolute;left:0px;top:0px;
-	width:654px;height:492px;
+	width:750px;height:566px;
         border: 2px dashed #333333; border-radius: 5px;
         text-align: center; font: 12pt bold; color: black;">
 
@@ -94,13 +95,13 @@ var WindoW = winWiHi();
 </div>
 
 <canvas id="UKNC_canvas" width="640px" height="288px" class="disSel"
- style ="position:absolute;left:6px;top:20px;width:640px;height:460px;">
+ style ="position:absolute;left:6px;top:20px;width:740px;height:540px;">
 </canvas>
 </div>
 <!-- 640x288 looks too wide -->
 
 <!-- User GUI options -->
-<div id="options" class="disSel" style ="position:absolute;left:0px;top:510px;background-color:#808080">
+<div id="options" class="disSel" style ="position:absolute;left:0px;top:580px;background-color:#808080">
 <table>
 <tr>
  
@@ -485,6 +486,14 @@ if(FullScreen) {
  var q=GE("options"); q.innerHTML="";
  FullScreen=2;
  }
+ else {
+  if(dbg.active) {
+	O = GE("debug_div");
+	if(O!=null) {
+		O.style.zIndex = 9000;
+   }
+   }
+ }
 }
    
  Q = GE("usercolor");
@@ -519,13 +528,14 @@ Q = GE("toucheson");
 if(Q!=null) {
 	Q.checked = Touch_Buttons;
 	
-	var r=GE("TCFL");
+	var r=GE("TCFL"),R=GE("keys_hint");
 	if(!Touch_Buttons && r.innerHTML.indexOf("FullScreen")<0) {
 	var O=GE("UKNC_canvas"),q=GE("options"),m=GE("dropfile");
 	var w=O.style,z=m.style;
 	w.width="900px"; w.height="600px";
 	z.width="914px"; z.height="630px";
 	q.style.top = "640px";
+	R.style.visibility = "hidden";
 	r.innerHTML='<input type="checkbox" class="Ckbx" '+
 		'title="Turn on FullScreen mode" onclick="openFullscreen();">FullScreen<br>';
 	}
@@ -643,10 +653,10 @@ function closeFullscreen() {
 </script>
 
 <div id="debug_div" style="position:absolute;left:30;top:300;width:800;height:350;visibility:hidden;background-color:white"></div>
-<div id="numpad" style="position:absolute;left:670;top:4;width:227;height:376;visibility:hidden;" onmousedown="preventaction(event)">
-<img src="numpad.png" id="vnumpad" width="295" height="489" onmousedown="preventaction(event)">
+<div id="numpad" style="position:absolute;left:770;top:14;width:227;height:376;visibility:hidden;" onmousedown="preventaction(event)">
+<img src="numpad.png" class="disSel" id="vnumpad" width="295" height="489" onmousedown="preventaction(event)">
 </div>
-<div id="keys_hint" style="position:absolute;left:690;top:500;width:200;height:100;background-color:grey">
+<div id="keys_hint"  class="disSel" style="position:absolute;left:790;top:520;width:200;height:100;background-color:grey" onmousedown="preventaction(event)">
 <font color="white" size="2">
 Stop=Esc, AR2=Shift+Esc, Alt,UPR=LCtrl, LShift+..., Caps, <br>F1-F10=Alt+[1..0],  
 Break,Ins,Del,Home,End, UST=F11,Shift+F11, F1-F5+Shift,<br>
@@ -655,7 +665,7 @@ Space, Arrows, NumKeys, Rshift,<br>guess and try...
 </div>
 
 <script type="text/javascript">
-crea_Numpad();
+crea_Numpad( 770/*left_x*/, 14/*top_y*/);
 </script>
 
 </body>

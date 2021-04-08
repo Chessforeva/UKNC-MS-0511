@@ -18,16 +18,16 @@ var TouchesNow = 0;
 
 function AddKeyButtons()
 {
-    addKey( "Esc",0, 4,  680,10, 90,90 );
-    addKey( "Enter",0, 107,  780,10, 180,90 );
+    addKey( "Esc",0, 4,  774,10, 90,90 );
+    addKey( "Enter",0, 111,  870,10, 180,90 );
     
-    addKey( "Left",0, 78,  670,130, 100,220 );
-    addKey( "Up",0, 108,  776,116, 100,110 );
-    addKey( "Down",0, 92,  776,240, 100,110 );
-    addKey( "Right",0, 91,  882,130, 100,220 );
+    addKey( "Left",0, 78,  764,130, 100,220 );
+    addKey( "Up",0, 108,  870,116, 100,110 );
+    addKey( "Down",0, 92,  870,240, 100,110 );
+    addKey( "Right",0, 91,  976,130, 100,220 );
     
-    addKey( "Shift",0, 69,  840, 386, 140,90 );
-    addKey( "Space",0, 75,  670,386, 160,90 );
+    addKey( "Shift",0, 69,  934, 386, 140,90 );
+    addKey( "Space",0, 75,  764,386, 160,90 );
 }
 
 KBF_ = [];
@@ -182,11 +182,11 @@ function divByPos(v,h) {
 	return "nump_" + NmpCd[(v*3)+h].toString();
 }
 
-function crea_Numpad() {
+function crea_Numpad(left_x, top_y) {
  for(var v=0; v<5; v++)
   for(var h=0; h<3; h++) {
-	var x = 680+(h*92) + ((h>0) ? (h-1)*7 : 0);
-	var y = 14+(v*92) + ((v>0) ? (v-1)*7 : 0);
+	var x = left_x + 4 + (h*98) + ((h>0) ? (h-1)*4 : 0);
+	var y = top_y + 4 + (v*95) + ((v>0) ? (v-1)*4 : 0);
 	document.write('<div id="' + divByPos(v,h) + '" style="position:absolute;left:' +
 		parseInt(x) +';top:' + parseInt(y) + ';width:84;height:84;visibility:visible;"></div>');
 	}

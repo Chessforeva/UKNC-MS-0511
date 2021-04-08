@@ -55,11 +55,15 @@ this.init = function( div_id ) {
 		'<input type="button" class="dbg0" id="dbg_run" value="Run F10,stop F9" title="Run continue" onclick="dbg.Run()"><br>' +
 		'<input type="button" class="dbg0" id="dbg_step" value="Step F7" title="Step" onclick="dbg.Step()">' +
 		'<input type="button" class="dbg0" id="dbg_over" value="StepOver F8" title="Over" onclick="dbg.StepOver()">' +
+		'<div class="dbg0" style="display:inline;"> BP:</div>' +
+		'<input type="text" id="dbg_AddrBP" class="dbg0" value="" size="7" onchange="dbg.setBreakPoint()">' +
 		'</td></tr><tr><td><div id="dbg_asm" class="dbg0"></div></td></tr></table></td>' +
-		'<td width="160"><div id="dbg_regs" class="dbg0"></div></td>' +
+		'<td width="160"><div title="To save .uknc" onclick="download_uknc()" style="display:inline;cursor:pointer">' +
+		'<font color="brown" SIZE="2"><b><u>Save for UKNCBTL</u></b></font></div><a id="DOWNLUKNC"></a>' +
+		'<div id="dbg_regs" class="dbg0"></div></td>' +
 		'<td width="60"><div id="dbg_stack" class="dbg0"></div></td>' + 
 		'<td width="120"><div id="dbg_ports" class="dbg0"></div></td>' +
-		'<td width="100"><input type="text" id="dbg_AddrMem" class="dbg0" value="160000" size="6" onchange="dbg.MemRdrw()"> ' +
+		'<td width="100"><input type="text" id="dbg_AddrMem" class="dbg0" value="160000" size="7" onchange="dbg.MemRdrw()"> ' +
 		'<select id="dbg_memMd" class="dbg0" onchange="dbg.MemMode()">' +
 		'<option value="' + ADDRTYPE.ROM + '">ROM</option>' +
 		'<option value="' + ADDRTYPE.RAM12 + '">CPU</option>' +
@@ -69,6 +73,7 @@ this.init = function( div_id ) {
 		'<option value="' + ADDRTYPE.RAM2 + '">RAM2</option>' +
 		'</select><br>' +
 		'<div id="dbg_mem" class="dbg0"></div></td></tr></table>';
+		
 		O.innerHTML = s;
 	}
 }
@@ -117,6 +122,12 @@ this.StepOver = function() {
 	fdraw = true;
 }
 
+this.setBreakPoint = function() {
+	var addr = parseInt( GE("dbg_AddrBP").value, 8 );
+	addr = ADDRESS( addr & 0xFFFE );
+	GE("dbg_AddrBP").value = OCT(addr,6);
+	self.Processor.bp = addr;
+}
 
 	// returns length of instruction, prepares Instr, Arg in disasm
 this.InstructionDisasm = function( Processor, Address ) {
