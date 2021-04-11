@@ -29,12 +29,13 @@ JS ported from UKNCBTL. All the knowledges and thanks.
   исходняк: UKNCBTL
   
  Проект "вспомним детство".
- Пока сырой, терпения. Удивительно, удалось ускорить.
+ Оптимизация, удалось ускорить для HTML5.
+ Нужно делать под WebAssembly в будущем.
  
 Itogo:
  
   NO TAPE. Standard FLOPPY DISKS.
-  Poor sound. Much to do, but later
+  Poor sound. Much to do, but later.
   
 Soviet school computer during 80s-90s.
 2 CPUs ~8MHz 16 bit !
@@ -181,14 +182,29 @@ var WindoW = winWiHi();
 	onchange="userGames()">
   <option value="">♠♣♥♦ Games ♠♣♥♦</option>
   <option value="knight.zip">Knight</option>
+  <option value="lode3.zip">Lode runner</option>
+  <option value="newtetris.zip">Tetris</option>
   <option value="krakout.zip">Krakout</option>
   <option value="welltris.zip">Welltris</option>
+  <option value="lasthero.zip">Last Hero</option>
+  <option value="columns.zip">Columns</option>
   <option value="gm40">40 games</option>
   <option value="king.zip">Korolevstvo</option>
+  <option value="zvzdpatrol.zip">Zvezdn.Patrul.</option>
+  <option value="gxonix.zip">GXonix</option>
+  <option value="mklad.zip">Klad</option>
   <option value="arkanoid.zip">Arkanoid</option>
+  <option value="bolder.zip">Bolder</option>
   <option value="sokoban.zip">Sokoban</option>
   <option value="puckman.zip">Puckman</option>
   <option value="hwyenc.zip">HwyEnc demo</option>
+  <option value="cline.zip">ColorLines</option>
+  <option value="saper.zip">Saper mines</option>
+  <option value="goblin.zip">Zamok Goblin.</option>
+  <option value="boa.zip">Boa snake</option>
+  <option value="mine.zip">Mine sweeper</option>
+  <option value="land.zip">Land</option>
+  <option value="kotribalov.zip">Kot Ribolov</option>
   <option value="GMbst">MZ0: - MZ3: RUN</option>
   <option value="GML1">DIR /BRI MZ1:</option>
   <option value="ITO90.zip">ITO 90 disk</option>
@@ -573,7 +589,11 @@ function userGames(file) {
 	
 	switch(f) {
 	case "gm40": goDsks(["gm40a.zip","gm40b.zip"]); return;
-	case "king.zip": NUMPAD = 1; break;
+	case "king.zip":
+	case "zvzdpatrol.zip":
+	case "kotribalov.zip":
+	case "land.zip":
+		NUMPAD = 1; break;
 	case "hwyenc.zip":
 	case "ITO90.zip":
 		Board.LoadFromImage( UkncZagruzka,1 ); break;

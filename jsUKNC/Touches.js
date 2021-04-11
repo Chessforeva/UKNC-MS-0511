@@ -19,7 +19,7 @@ var TouchesNow = 0;
 function AddKeyButtons()
 {
     addKey( "Esc",0, 4,  774,10, 90,90 );
-    addKey( "Enter",0, 111,  870,10, 180,90 );
+    addKey( "Enter",0, 107,  870,10, 180,90 );
     
     addKey( "Left",0, 78,  764,130, 100,220 );
     addKey( "Up",0, 108,  870,116, 100,110 );
