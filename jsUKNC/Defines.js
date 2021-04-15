@@ -230,6 +230,49 @@ var UKNCIMAGE = {
 	VERSION: 0x10001  // 1.1
 };
 
+/* Hard Disk IDE */
+var IDE = {
+	DISK_SECTOR_SIZE:512,
+	TIME_PER_SECTOR:256,		//(DISK_SECTOR_SIZE / 2)
+	PORT: {
+		DATA:				0x1F0,
+		ERROR:				0x1F1,
+		SECTOR_COUNT:		0x1F2,
+		SECTOR_NUMBER:		0x1F3,
+		CYLINDER_LSB:		0x1F4,
+		CYLINDER_MSB:		0x1F5,
+		HEAD_NUMBER:		0x1F6,
+		STATUS_COMMAND:		0x1F7
+		},
+	STATUS: {
+		ERROR:				0x1,
+		HIT_INDEX:			0x2,
+		BUFFER_READY:		0x8,
+		SEEK_COMPLETE:		0x10,
+		DRIVE_READY:		0x40,
+		BUSY:				0x80
+		},
+	COMMAND: {
+		READ_MULTIPLE:		0x20,
+		READ_MULTIPLE1:		0x21,
+		SET_CONFIG:			0x91,
+		WRITE_MULTIPLE:		0x30,
+		WRITE_MULTIPLE1:	0x31,
+		IDENTIFY:			0xEC
+		},
+	ERROR: {
+		NONE: 				0x0,
+		DEFAULT:			0x1,
+		UNKNOWN_COMMAND:	0x4,
+		BAD_LOCATION:		0x10,
+		BAD_SECTOR:			0x80
+		},
+		
+	TIMEEVT: {
+		NONE: 0, RESET_DONE: 1, READ_SECTOR_DONE: 2, WRITE_SECTOR_DONE: 3
+		}
+	}
+	
 var KEYB = {
 	RUS: 1,
 	LAT: 2,
@@ -289,6 +332,13 @@ function memcpy( A, B, N ) {
 function waddI8 ( I8, o, value ) {
 	I8[o.i++]=(value&255);
 	I8[o.i++]=((value>>>8)&255);
+}
+
+
+// add 32 bit value to Uint8array I8
+function w2x_addI8 ( I8, o, value ) {
+	waddI8 ( I8, o, (value&0xFFFF) );
+	waddI8 ( I8, o, ((value>>>16)&0xFFFF) );
 }
 
 

@@ -292,7 +292,7 @@ this.detach = function()
         if (O.p >= Sz) O.p = 0;	// and from the beginning...
     }
 	
-	speed.disks_adjust();
+	speed.disks_adjust();		// counts for Flopies and HDDs
 
 	
     // For each drive: reading and writing

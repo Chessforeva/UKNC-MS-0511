@@ -815,7 +815,7 @@ init1();	// now
             else if ((Port.o177054 & 14) != 0)  // ROM cartridge selected
             {
                 var /*int*/ slot = ((Port.o177054 & 8) == 0) ? 1 : 2;
-                if (Board.IsHardImageAttached(slot) && address >= 36864 /*0110000*/ )
+                if ((HDs && Board.IsHardImageAttached(slot)) && address >= 36864 /*0110000*/ )
                 {
                     offset = address;
                     return ADDRTYPE.IO;  // 110000-117777 - HDD ports

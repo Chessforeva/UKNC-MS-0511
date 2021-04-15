@@ -339,7 +339,9 @@ init();
       return -1;
 	case 123: /*F12*/
 	  reset = (++reset)%3;
-	  if(reset==2) Board.Reset();		// not needed, but works ok too
+	  if(reset==2) {
+		Board.Reset();		// not needed, but works ok too
+		}
 	  else {
 		Board.LoadFromImage( (reset==1 ? UkncZagruzka : UkncBasic),1 );
 		}

@@ -56,10 +56,29 @@ Gbin.onGot=function(filename, bytes)
 	if(f.indexOf(".dsk")>0 || f.indexOf(".rtd")>0) {
 		var n = FloppyCtl.get_free_drive_N();
 		if(n>=0) FloppyCtl.AttachImage(n,filename, bytes);
-		if(LOADDSK.length>1) {
-			LOADDSK = LOADDSK.slice(1);
-			GoDisks();	// read next disk
+		}
+	if(f.indexOf(".bin")>0) {		// cartridges
+		var n = Board.get_free_cart_N();
+		if(n>0) {
+			Board.LoadROMCartridge(n,filename, bytes);
 			}
+		}
+	if(f.indexOf(".img")>0) {
+		var n = Board.get_free_hdd_drive_N();
+		if(n>0) {
+			var cn = Board.get_free_cart_N();		// also load Cartridge ROM for HDD (ID, not WD)
+			if(cn==n) {
+					// the file "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
+				Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);	
+				}
+			HardDrives[n-1].AttachImage(filename, bytes);
+			HDs = true;
+			}
+		}
+		
+	if(LOADDSK.length>1) {
+		LOADDSK = LOADDSK.slice(1);
+		GoDisks();	// read next disk or file
 		}
 	}
 

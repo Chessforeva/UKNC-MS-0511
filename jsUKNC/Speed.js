@@ -50,7 +50,7 @@ Optimize=0
 
 	// various accessible flags and counters to differ and optimize where possible
 
-	this.dsk = false;		// disk drive is active	(1 - then should count ticks)
+	this.dsk = false;		// disk drive is active	(1 - then should count ticks), same for HDD
 	var idle = 0;			// counts timing while nothing happens with disk drive
 	
 	this.OZ = 0;			// 1-calculate counters

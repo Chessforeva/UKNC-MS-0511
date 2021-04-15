@@ -19,7 +19,7 @@ outline: 0;
 
 <!--
 UKNC Elektronika MS-0511 emulator HTML5 javascript
-v.1.0 (04.2021), not any right reserved:)
+v.1.a (04.2021), not any right reserved:)
 Released to be online and working, bugs inside. 
 
 JS ported from UKNCBTL. All the knowledges and thanks.
@@ -30,12 +30,12 @@ JS ported from UKNCBTL. All the knowledges and thanks.
   
  Проект "вспомним детство".
  Оптимизация, удалось ускорить для HTML5.
- Нужно делать под WebAssembly в будущем.
  
 Itogo:
  
   NO TAPE. Standard FLOPPY DISKS.
-  Poor sound. Much to do, but later.
+  HDD IDE compatible via driver.
+  Poor speaker sound.
   
 Soviet school computer during 80s-90s.
 2 CPUs ~8MHz 16 bit !
@@ -53,6 +53,7 @@ Soviet school computer during 80s-90s.
 <script src="KM1801VM2.js"></script>
 <script src="MemContr.js"></script>
 <script src="Floppy.js"></script>
+<script src="HardDisk.js"></script>
 <script src="Board.js"></script>
 <script src="Screen.js"></script>
 <script src="Keyboard.js"></script>
@@ -87,7 +88,7 @@ var WindoW = winWiHi();
         text-align: center; font: 12pt bold; color: black;">
 
 <div id="filesloaded" style="display:inline">
-<font color="white">Drop a .uknc .dsk .sav .rom file here, or zipped one</font>
+<font color="white">Drop a .uknc .dsk(floppy) .sav(.gam,.gme) .rom, .ram(cart.), .img(IDE) file here, or zipped one</font>
 <div id="download_zone" style="color:blue;display:inline;visibility:hidden">
 <a id="download_file" style="color:#0bbb;display:inline;">Save file</a>
 </div>
@@ -122,7 +123,10 @@ var WindoW = winWiHi();
   <option value="MTH">Math.Equations</option>
   <option value="TB">TurboBasic(Menu=Esc)</option>
   <option value="BBCbas">BBC basic RT11</option>
-  <option value="ADOS">ADOS</option>
+  <option value="HDD1">Ide HDD boot sample</option>
+  <option value="HDD2">HDD can copy to</option>
+  <option value="ADOS">ADOS, WDX for HDD</option>
+  <option value="CasBAS">Basic cartridge</option>
   <option value="Cheat">How to cheat lives!</option>
  </select>
 
@@ -285,9 +289,13 @@ var Ppu = new K1801VM2("PPU");
 
 Cpu.MC = new MemoryController(0);		// CPU memory control 
 Ppu.MC = new MemoryController(1);		// PPU memory control
-	
+
+var HardDrives = [];		// 2 HDD can be attached
+var HDs = false;			// global, is any HD attached?	
+
 var Board = new Motherboard();
 var FloppyCtl = new FloppyController();
+
 
 Board.Reset();
 Board.LoadROM(UkncROM);				// read UNKC_ROM.bin 32KB
@@ -463,8 +471,11 @@ function userBoot() {
  case "MTH": goDsks(["net11rtA.zip","MathA.zip","MathB.zip"]); break;
  case "TB": goDsks(["TurboBasic0.zip","TurboBasicA.zip"]); break;
  case "BBCbas": goDsks(["BBCbasic.zip"]); break;
- case "ADOS": goDsks(["ADos0.zip","ADosA.zip"]); return;
+ case "HDD1": goDsks(["HDD2MB.zip"]); break;
+ case "HDD2": goDsks(["IDHDDMNG.zip","HDD2MB.zip","idmngr.zip"]); break;
+ case "ADOS": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
  case "DBG": dbg.show(); break;
+ case "CasBAS": LOADDSK = ["bascart.zip"]; GoDisks(); break;
  case "Cheat": cheats.cheathelp(); break;
  }
 }
@@ -480,7 +491,7 @@ function goDsks(dsk_arr) {
 // on each loop update option values
 function userLoop3sec()
 {
- var Q,m,n,i,s,o,v;
+ var Q,m,n,i,j,s,o,v;
  
 if(FullScreen) {
 
@@ -519,21 +530,27 @@ if(FullScreen) {
  Q = GE("filesloaded");
  if(Q!=null) {
 	s="";
-	var b1='<FONT COLOR="brown" SIZE="3"><b><u>';
-	var b2='<div title="To download" onclick="download_dsk(';
-	var b3=')" style="display:inline;cursor:pointer">';
-	var b4='</div><a id="DOWNLOAD';
-	var b5='"></a></u></b></FONT><FONT COLOR="yellow">';
-	var b6='</FONT>';
+	var b1='<FONT COLOR="brown" SIZE="3"><b><u>',
+	b2='<div title="To download" onclick="',
+	b20 = 'download_dsk(', b21 = 'download_img(',
+	b3=')" style="display:inline;cursor:pointer">',
+	b4='</div><a id="DOWNLOAD', b5='"></a></u></b></FONT><FONT COLOR="yellow">', b6='</FONT>';
 
 	m = "";
 	var disks = FloppyCtl.getAttached();
 	if(disks.length) {
 		for(i in disks) {
 			o=disks[i];
-			s+=b1+b2+i+b3+"["+o.id+"]"+b4+i+b5+o.FileName+b6+"  ";
+			s+=b1+b2+b20+i+b3+"["+o.id+"]"+b4+i+b5+o.FileName+b6+"  ";
 			}
 		}
+	if(HDs) {
+	 for(j=0;j<2;j++) {
+		o = HardDrives[j];
+		if(o.attached) s+=b1+b2+b21+(10+j)+b3+"["+o.id+"]"+b4+(10+j)+b5+o.FileName+b6+"  ";
+		}
+	 }
+	s+=Board.CartInfo();
 	if(s.length) Q.innerHTML = s;
 	}
 
@@ -628,10 +645,20 @@ function download_dsk(i) {
 
     var disks = FloppyCtl.getAttached();
     var a = GE("DOWNLOAD"+i), disk = disks[i];
-    var data = FloppyCtl.reSized819200(disk.bytesAll);
+    var data = FloppyCtl.reSized819200(disk.bytesAll);	// Uint8Array
     var file = new Blob([data], {type: "text/plain"});
     a.href = URL.createObjectURL(file);
     a.download = "nw_"+disk.FileName;
+    a.click();
+}
+
+function download_img(i) {
+
+    var a = GE("DOWNLOAD"+i), hd = HardDrives[i-10];
+    var data = hd.bytesAll;	// Uint8Array
+    var file = new Blob([data], {type: "text/plain"});
+    a.href = URL.createObjectURL(file);
+    a.download = "nw_"+hd.FileName;
     a.click();
 }
 

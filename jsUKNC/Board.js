@@ -1,10 +1,7 @@
 ﻿/* 
 	
 	Motherboard class implementation (minimal)
-	(ToDo:
-		Network, Serial, Parallel, HardDisks, Cartridges, Audio on speaker
-		This version is short and intended to run known UKNC games.
-		)
+	(This version is short and intended to run known UKNC games.)
 */
 
 // Timer ticker (global)
@@ -20,7 +17,7 @@ var /*uint8_t[]*/ ROM;			// System ROM, 32 KB
 
 // NOT realized, just defined
 var /*uint8_t[]*/ ROMCart = [];	// [2][] ROM cartridges #1 and #2, 24 KB each
-var /*uint8_t[]*/ HardDrives = [];	//[2] HDD control	(ToDo, not in this version)
+var CartNames = [];
 
 // Audio sound generator for the default speaker
 // is not realized in this version.
@@ -28,7 +25,6 @@ var /*uint8_t[]*/ HardDrives = [];	//[2] HDD control	(ToDo, not in this version)
 Motherboard  = function()
 {
 	var self = this;
-	
 	
 // Timing
 	var /*uint16_t*/    multiply = 1;
@@ -108,6 +104,11 @@ function init() {
     ROM    = /*uint8_t*/ memset( [], 0, 32768);
     ROMCart[0] = [];
     ROMCart[1] = [];		// not realized in this version
+	CartNames[0] = "";
+	CartNames[1] = "";
+	
+    HardDrives[0] = new HardDrive(0);
+	HardDrives[1] = new HardDrive(1);
 }
 
 init();		// now
@@ -119,7 +120,10 @@ init();		// now
     Ppu.SetACLOPin(true);
 
     FloppyCtl.Reset();
-
+	HardDrives[0].Reset();
+	HardDrives[1].Reset();
+	HDs = false;
+	
 	Timer.Tick = 0;
 	Timer.reload = 0;
 	Timer.status = 0;
@@ -156,18 +160,20 @@ init();		// now
 
 /*uint16_t*/ this.GetROMCartWord = function(/*int*/ c, /*uint16_t*/ n)
 {
-    return 0;
+    var i = n&0xFFFE, C = ROMCart[c-1];
+    return /*uint16_t*/ ( C.length ? ((C[i+1]<<8) | C[i]) : 0xFFFF );
 }
 
 /*uint8_t*/ this.GetROMCartByte = function(c, /*uint16_t*/ n)
 {
-    return 0;
+    var C = ROMCart[c-1];
+    return /*uint8_t*/ ( C.length ? C[i] : 255 );
 }
 
 /*uint16_t*/ this.GetRAMWord = function(p, /*uint16_t*/ n)
 {
-	var i = (n & 0xFFFE);
-    return /*uint16_t*/ ((RAM[p][i+1]<<8) | RAM[p][i]);
+	var i = (n & 0xFFFE), R = RAM[p];
+    return /*uint16_t*/ ((R[i+1]<<8) | R[i]);
 }
 
 /*uint8_t*/ this.GetRAMByte = function(p, /*uint16_t*/ n)
@@ -177,10 +183,10 @@ init();		// now
 
 /*void*/ this.SetRAMWord = function(p, /*uint16_t*/ n, /*uint16_t*/ word)
 {
-	var i = (n & 0xFFFE), i1=i+1;
+	var i = (n & 0xFFFE), i1=i+1, R=RAM[p];
 	
-	RAM[p][i] = word & 255;
-	RAM[p][i1] = (word>>>8) & 255;
+	R[i] = word & 255;
+	R[i1] = (word>>>8) & 255;
 	
 	 // screen update, faster than "redraw all" in most cases
 	if (Px_) {
@@ -201,33 +207,65 @@ init();		// now
 }
 
 
-// Cartridges (Not in this version)
-function /*bool*/ IsROMCartridgeLoaded(/*int*/ n) /*const*/
-{
-    return 0;
+/*
+ Cartridges 
+*/
+
+this.get_free_cart_N = function() {
+	for(var i=1; i<=2; i++) {
+		if(!ROMCart[i-1].length) return i;
+		}
+	return 0;
 }
 
-
-// Hard Drives (Not in this version)
-
-/*bool*/ this.IsHardImageAttached = function(/*int*/ slot) /*const*/
+this.LoadROMCartridge = function(/*int*/ cartno, FileName, /*uint8_t*/ bBuffer)  // Load 24 KB ROM cartridge image
 {
-    return 0;
+    memcpy(ROMCart[cartno-1], bBuffer, 24576);
+	CartNames[cartno-1] = FileName;
 }
 
-function /*bool*/ IsHardImageReadOnly(/*int*/ slot) /*const*/
-{
-    return 1;
+this.CartInfo = function() {
+	var s = "";
+	for(var i in ROMCart) {
+		if(ROMCart[i].length) s+='<font color="white">['+i+':'+ CartNames[i] + ']</font> ';
+		}
+	return s;
+}
+
+/*
+ IDE Hard Drives
+ Require loaded cartridge with drivers
+ */
+
+this.get_free_hdd_drive_N = function() {
+
+	for(var i=1; i<=2; i++) {
+		if(!HardDrives[i-1].attached) return i;
+		}
+	return 0;
+} 
+
+this.IsHardImageAttached = function(slot) {
+	return HardDrives[slot-1].attached;
 }
 
 /*uint16_t*/ this.GetHardPortWord = function(/*int*/ slot, /*uint16_t*/ port)
 {
-    return 0;
+ var O = HardDrives[slot-1];
+ if (!O.attached) return 0;
+ port = /*uint16_t*/ ((~(port >>> 1)) & 7) | 0x1F0;
+ var /*uint16_t*/ data = O.ReadPort(port);
+ return ((~data)&0xFFFF)>>>0;  // QBUS inverts the bits
 }
+
 
 /*void*/ this.SetHardPortWord = function(/*int*/ slot, /*uint16_t*/ port, /*uint16_t*/ data)
 {
-    return;
+ var O = HardDrives[slot-1];
+ if (!O.attached) return 0;
+ port = /*uint16_t*/ ((~(port >>> 1)) & 7) | 0x1F0;
+ data = ((~data)&0xFFFF)>>>0;	// QBUS inverts the bits
+ O.WritePort(port, data);
 }
 
  
@@ -419,6 +457,12 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 			FloppyCtl.Periodic();  // Each 32nd tick -- FDD tick
 			Tick32();
 			}
+			
+		if (HDs) {
+			var H0 = HardDrives[0], H1 = HardDrives[1];
+			if(H0.attached) H0.Periodic();
+			if(H1.attached) H1.Periodic();
+			}
 
         if (frameticks % 23 == 0) //AUDIO tick %23
             DoSound();				// count channels too, if we want to save
@@ -517,10 +561,16 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 			
 			Tick32();		// very frequent, keyboard processing
 			
+			if (HDs) {
+				var H0 = HardDrives[0], H1 = HardDrives[1];
+				if(H0.attached) H0.Periodic();
+				if(H1.attached) H1.Periodic();
+			}
+			
 				//AUDIO tick (do not care, just play a game)
 			//if (B % 23 == 0) 
 			//	DoSound();
-			
+
 			//OtherDevices();
 
     }
@@ -1046,14 +1096,6 @@ function /*void*/ DoSound()
 function OtherDevices() {
 
  if(0) {		// Not developed
-
-	// If Cassette2 with driver is used and IDE drives connected, then .img can be attached in UKNCBTL
-	if(0) {
-       if (HardDrives[0] != null)
-            HardDrives[0].Periodic();
-        if (HardDrives[1] != null)
-            HardDrives[1].Periodic();
-		}
 	
 	if (0 /*Tape*/)
         {
