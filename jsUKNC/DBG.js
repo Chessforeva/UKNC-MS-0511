@@ -50,7 +50,7 @@ this.init = function( div_id ) {
 
 	O = GE( div_id );
 	if(O!=null)  {
-		var s = '<table height="340"><tr><td width="250"><table><tr><td>' +
+		var s = '<table height="340"><tr><td width="260"><table><tr><td>' +
 		'<input type="button" class="dbg0" id="dbg_swap" value="Cpu/Ppu" title="Swap processor" onclick="dbg.Swap()">' +
 		'<input type="button" class="dbg0" id="dbg_run" value="Run F10,stop F9" title="Run continue" onclick="dbg.Run()"><br>' +
 		'<input type="button" class="dbg0" id="dbg_step" value="Step F7" title="Step" onclick="dbg.Step()">' +
@@ -58,12 +58,12 @@ this.init = function( div_id ) {
 		'<div class="dbg0" style="display:inline;"> BP:</div>' +
 		'<input type="text" id="dbg_AddrBP" class="dbg0" value="" size="7" onchange="dbg.setBreakPoint()">' +
 		'</td></tr><tr><td><div id="dbg_asm" class="dbg0"></div></td></tr></table></td>' +
-		'<td width="160"><div title="To save .uknc" onclick="download_uknc()" style="display:inline;cursor:pointer">' +
+		'<td width="180"><div title="To save .uknc" onclick="download_uknc()" style="display:inline;cursor:pointer">' +
 		'<font color="brown" SIZE="2"><b><u>Save for UKNCBTL</u></b></font></div><a id="DOWNLUKNC"></a>' +
 		'<div id="dbg_regs" class="dbg0"></div></td>' +
-		'<td width="60"><div id="dbg_stack" class="dbg0"></div></td>' + 
-		'<td width="120"><div id="dbg_ports" class="dbg0"></div></td>' +
-		'<td width="100"><input type="text" id="dbg_AddrMem" class="dbg0" value="160000" size="7" onchange="dbg.MemRdrw()"> ' +
+		'<td width="90"><div id="dbg_stack" class="dbg0"></div></td>' + 
+		'<td width="150"><div id="dbg_ports" class="dbg0"></div></td>' +
+		'<td width="150"><input type="text" id="dbg_AddrMem" class="dbg0" value="160000" size="7" onchange="dbg.MemRdrw()"> ' +
 		'<select id="dbg_memMd" class="dbg0" onchange="dbg.MemMode()">' +
 		'<option value="' + ADDRTYPE.ROM + '">ROM</option>' +
 		'<option value="' + ADDRTYPE.RAM12 + '">CPU</option>' +
