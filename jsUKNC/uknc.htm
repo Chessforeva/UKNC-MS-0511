@@ -510,15 +510,14 @@ if(FullScreen) {
  var q=GE("options"); q.innerHTML="";
  FullScreen=2;
  }
- else {
-  if(dbg.active) {
+}
+
+if(dbg.active) {
 	O = GE("debug_div");
 	if(O!=null) {
 		O.style.zIndex = 9000;
+	}
    }
-   }
- }
-}
    
  Q = GE("usercolor");
  if(Q!=null) {

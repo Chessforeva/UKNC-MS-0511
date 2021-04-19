@@ -70,7 +70,6 @@ Cheats = function(){
  
  function subst_ShiftSpace() {
 	if((FLAGS&1)==0) {
-		RAM[0][65535]=207;
 		keyboard.Subst_Key(32, 69); touch_Subst_Key(75, 69);
 		FLAGS|=1;
 	}
@@ -82,35 +81,35 @@ Cheats = function(){
  var f = self.FileName;
  
  /* Knight.uknc */
- if( f=="knight.uknc" || RAM[0][65535]==207 ) {
-	RAM[0][65535]=207;	// we know this file
+ if( f=="knight.uknc" || RAM[0][65535]==200 ) {
+	RAM[0][65535]=200;	// we know this file
 	subst_ShiftSpace();	// if Knight then substitute keys
 	RAM[1][10089] = 8;	// hack lives
 	}
 	
-if( f=="arkanoid.uknc" || RAM[0][65535]==207 ) {
-	RAM[0][65535]=207;
+if( f=="arkanoid.uknc" || RAM[0][65535]==201 ) {
+	RAM[0][65535]=201;
 	subst_ShiftSpace();
 	RAM[2][9062] = 112;	// hack lives (not sure)
 	}
 
-if( f=="puckman.uknc" || RAM[0][65535]==207 ) {
-	RAM[0][65535]=207;
+if( f=="puckman.uknc" || RAM[0][65535]==202 ) {
+	RAM[0][65535]=202;
 	RAM[1][7771] = 7;	// hack lives (not sure)
 	}
 	
-if( f=="gxonix.uknc" || RAM[0][65535]==207 ) {
-	RAM[0][65535]=207;
+if( f=="gxonix.uknc" || RAM[0][65535]==203 ) {
+	RAM[0][65535]=203;
 	RAM[1][12801] = 9;	// hack lives
 	}
 	
-if( f=="lasthero.uknc" || RAM[0][65535]==207 ) {
-	RAM[0][65535]=207;
+if( f=="lasthero.uknc" || RAM[0][65535]==204 ) {
+	RAM[0][65535]=204;
 	subst_ShiftSpace();
 	}	
   
-if( f=="boa.uknc" || RAM[0][65535]==207 ) {
-	RAM[0][65535]=207;
+if( f=="boa.uknc" || RAM[0][65535]==205 ) {
+	RAM[0][65535]=205;
 	keyboard.Subst_Key(37/*Left*/, 88/*Numpad 4*/); touch_Subst_Key(78/*default left arrow*/, 88);
 	keyboard.Subst_Key(39/*Right*/, 120/*Numpad 6*/); touch_Subst_Key(91/*righ arrow*/, 120);
 	keyboard.Subst_Key(38/*Up*/, 101/*Numpad 8*/); touch_Subst_Key(108/*default up arrow*/,101);
