@@ -21,4 +21,4 @@ Blog: http://bezjega.blogspot.com/2021/03/uknc-emulator-online.html
 Online:
 https://chessforeva.neocities.org/UKNC/uknc.htm
 
-http://smecers.000webhostapp.com/UKNC/uknc.htm
+https://chessforeva.bitbucket.io/UKNC/uknc.htm
