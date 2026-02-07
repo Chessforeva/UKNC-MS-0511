@@ -19,7 +19,12 @@ outline: 0;
 
 <!--
 UKNC Elektronika MS-0511 emulator HTML5 javascript
-v.1.a (04.2021), not any right reserved:)
+v.1.b 
+04.2021 - v.1.a
+02.2026 - fullscreen exit to the main window
+)
+
+Not any right reserved:)
 Released to be online and working, bugs inside. 
 
 JS ported from UKNCBTL. All the knowledges and thanks.
@@ -110,6 +115,7 @@ var WindoW = winWiHi();
  <select id="userboot" title="Booting options" onchange="userBoot()">
   <option value="UKB">ROM + Basic</option>
   <option value="UKZ">ROM + Menu</option>
+  <option value="FScr">Go FullScreen</option>
   <option value="RST">Reset restart (F12)</option>  
   <option value="RLD">Reload clear all</option>
   <option value="DBG">Debug (F9)</option>
@@ -223,14 +229,16 @@ var WindoW = winWiHi();
   <input type="checkbox" id="toucheson" class="Ckbx"
 	title="Show or Hide big touch buttons" 
 	onclick="Touch_Buttons=!Touch_Buttons;">Touches<br>
+  
   NumPad <input type="checkbox" id="numpadon" class="Ckbx"
 	title="Show or Hide Numpad touch buttons" 
 	onclick="NUMPAD=!NUMPAD;"><br>
+
+  </div>
   <input type="checkbox" id="soundonoff" class="Ckbx"
 	title="Turn sound (on|off)"
 	onclick="soundOn^=1;">Sound... 
-
-  </div>
+  
  </font></td>
 
 </tr>
@@ -421,6 +429,7 @@ function download(FileName, DataStr) {
 // User selected running speed
 function optSpeed() {
 	var v = GE("Speed_opts").value;
+	_speed_opt = v;
 	var S = speed, M=1000000;
 	switch(v) {
 	case "S1_100": S.set(64,100); break;
@@ -459,6 +468,7 @@ function userBoot() {
  switch(GE("userboot").value) {
  case "UKB": Board.LoadFromImage(UkncBasic,1); scr.DRAW(); break;
  case "UKZ": Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
+ case "FScr": openFullscreen(); break;
  case "RST": Board.Reset(); scr.DRAW(); break;
  case "RLD": document.location.href = href.split('?')[0]; break;
  case "net11": goDsks(["net11rtA.zip","net11rtB.zip"]); break;
@@ -488,6 +498,9 @@ function goDsks(dsk_arr) {
 	GoDisks();
 }
 
+_s4fs = {};	// Save for fullscreen values
+
+
 // on each loop update option values
 function userLoop3sec()
 {
@@ -496,20 +509,77 @@ function userLoop3sec()
 if(FullScreen) {
 
  if(FullScreen==1) {
+ 
  WindoW = winWiHi();
-	
- var O=GE("UKNC_canvas"),S=O.style, D=GE("dropfile");
+ 
+ var O=GE("UKNC_canvas"),S=O.style, D=GE("dropfile"), W = document.body;
+ var q=GE("options");
+
+ _s4fs.cL = S.left;
+ _s4fs.cT = S.top;
+ _s4fs.cW = S.width;
+ _s4fs.cH = S.height;
+ _s4fs.zI = S.zIndex;
+ _s4fs.zI = W.style.overflow;
+ _s4fs.TB = Touch_Buttons;
+ _s4fs.ophtm = q.innerHTML;
+ _s4fs.ophtm.kbh = kbhnt.cur;
+
  S.left="-2px"; S.top="-2px";
  S.width=''+parseInt(WindoW.width+4)+"px";
  S.height=''+parseInt(WindoW.height+4)+"px";
- O.style.zIndex = 8888;
- var W = document.body;
+ S.zIndex = 8888;
  W.style.overflow="hidden";
- kbhnt.cur=true; kbShow();/*turn off*/
+ 
+ if(kbhnt.cur) kbShow();/*turn off*/
  Touch_Buttons=false;
- var q=GE("options"); q.innerHTML="";
+ q.innerHTML="";
+ 
  FullScreen=2;
  }
+ 
+ if( isFullscreen() && FullScreen==2 ) FullScreen=3;	// We are in FullScreen mode
+ 
+ if( FullScreen==3 && !isFullscreen() ) {	// Exited Fullscreen mode
+	var B=GE("back_button"),T=B.style;
+	T.left='0px'; T.top='0px';
+	T.width='80px'; T.height='30px';
+	T.zIndex=9990;
+	T.visibility='visible';
+	FullScreen=4;
+	var Q=GE("back_butt");
+	Q.checked=0;
+	
+}
+ 
+if( FullScreen==5 ) {	// Return the main window
+
+ var O=GE("UKNC_canvas"),S=O.style, D=GE("dropfile"), W = document.body;
+ var q=GE("options");
+ 
+ var B=GE("back_button"),T=B.style;
+	T.left='0px'; T.top='0px';
+	T.width='0px'; T.height='0px';
+	T.visibility='hidden';
+	T.zIndex = 0;
+	FullScreen=0;
+ 
+ S.left = _s4fs.cL;
+ S.top = _s4fs.cT;
+ S.width = _s4fs.cW;
+ S.height = _s4fs.cH;
+ S.zIndex = _s4fs.zI;
+ W.style.overflow = _s4fs.zI;
+ Touch_Buttons = _s4fs.TB;
+ q.innerHTML = _s4fs.ophtm;
+ kbhnt.cur = _s4fs.ophtm.kbh;
+ if(kbhnt.cur) { kbhnt.cur = !kbhnt.cur; kbShow() };	// Turn on
+ 
+ v=GE("kbimage");
+ v.addEventListener( (TOUCH_ ? "touchstart" : "mousedown"), kbPressed, false);
+ 
+ }
+
 }
 
 if(dbg.active) {
@@ -683,6 +753,16 @@ function openFullscreen() {
   FullScreen=1;
 }
 
+function isFullscreen() {
+  return !!(
+    document.fullscreenElement ||
+    document.webkitFullscreenElement || // Safari
+    document.mozFullScreenElement ||     // Old Firefox
+    document.msFullscreenElement         // Old IE/Edge
+  );
+}
+
+	// not used
 function closeFullscreen() {
   var D = document;
   if (D.exitFullscreen) D.exitFullscreen();
@@ -690,8 +770,10 @@ function closeFullscreen() {
     D.webkitExitFullscreen();
   else if (D.msExitFullscreen) /* IE11 */
     D.msExitFullscreen();
-	FullScreen=0;
+  FullScreen=0;
 }
+
+
 
 /* Menus for some cases, no need to write "RUN MZ1:GAME.SAV[enter]" */
 var GameSelected = 0;	// selected game, or dsk:name
@@ -776,6 +858,13 @@ crea_Numpad( 770/*left_x*/, 14/*top_y*/);
 
 <div id="games_menu" style="position:absolute;left:260;top:60;width:420;height:300;visibility:hidden;">
 </div>
+<div id="back_button" style="position:absolute;left:0;top:0;width:0;height:0;visibility:hidden;background-color:white">
+<input type="checkbox" id="back_butt" class="Ckbx"
+	title="Go back to the options window"
+	onclick="FullScreen=5;"> close
+</button>
+</div>
+
 
 </body>
 

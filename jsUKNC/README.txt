@@ -1,5 +1,5 @@
 UKNC javascript emulator HTML5
-(version v1.a)
+(version v1.b)
 
 Some games and demos.
 
