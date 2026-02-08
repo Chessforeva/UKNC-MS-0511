@@ -218,7 +218,11 @@ SoundRenderer = function()
 		synthVal = synth.nextSample();	// 1 mixed or 3 channels
 		if(synth.mixed) {
 			c = synthVal-val;
-			val+=(c>32?32: (c<-32?-32:c));	// simple mixed distorted value
+			
+			// this smoothing filter has been removed, distorts the sound sometimes
+			// val+=(c>32?32: (c<-32?-32:c));
+			val += c;
+		
 			g = val;
 			}
 		else {
@@ -229,7 +233,11 @@ SoundRenderer = function()
     else if(self.covox)		// 1 channel
 		{	//...2)phase
 		c = covoxVal-val;
-		val+=(c>32?32: (c<-32?-32:c));	// smoothing
+		
+		// this smoothing filter has been removed, distorts the sound sometimes
+		// val+=(c>32?32: (c<-32?-32:c));
+		val += c;
+		
 		g = val;
 		}
 	else g = (A/xCPS);	// 1 channel
