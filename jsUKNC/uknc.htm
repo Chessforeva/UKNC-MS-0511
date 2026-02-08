@@ -514,26 +514,32 @@ if(FullScreen) {
  
  var O=GE("UKNC_canvas"),S=O.style, D=GE("dropfile"), W = document.body;
  var q=GE("options");
-
+   
  _s4fs.cL = S.left;
  _s4fs.cT = S.top;
  _s4fs.cW = S.width;
  _s4fs.cH = S.height;
- _s4fs.zI = S.zIndex;
- _s4fs.zI = W.style.overflow;
+ _s4fs.czI = S.zIndex;
+ _s4fs.W = W.style.overflow;
  _s4fs.TB = Touch_Buttons;
- _s4fs.ophtm = q.innerHTML;
- _s4fs.ophtm.kbh = kbhnt.cur;
-
+ _s4fs.kbh = kbhnt.cur;
+ _s4fs.opthtm = q.innerHTML;
+ _s4fs.Speed_opts = GE("Speed_opts").value;
+ _s4fs.usercolor = GE("usercolor").value;
+ _s4fs.userchars = GE("userchars").value;
+ _s4fs.usergames = GE("usergames").value;
+  
  S.left="-2px"; S.top="-2px";
  S.width=''+parseInt(WindoW.width+4)+"px";
  S.height=''+parseInt(WindoW.height+4)+"px";
  S.zIndex = 8888;
  W.style.overflow="hidden";
  
+ 
  if(kbhnt.cur) kbShow();/*turn off*/
  Touch_Buttons=false;
- q.innerHTML="";
+ 
+ q.innerHTML = '';	// clear
  
  FullScreen=2;
  }
@@ -550,6 +556,11 @@ if(FullScreen) {
 	var Q=GE("back_butt");
 	Q.checked=0;
 	
+	var O=GE("UKNC_canvas"),S=O.style;
+	WindoW = winWiHi();
+	S.left="0px"; S.top="0px";
+	S.width=''+parseInt(WindoW.width)+"px";
+	S.height=''+parseInt(WindoW.height)+"px";
 }
  
 if( FullScreen==5 ) {	// Return the main window
@@ -568,11 +579,14 @@ if( FullScreen==5 ) {	// Return the main window
  S.top = _s4fs.cT;
  S.width = _s4fs.cW;
  S.height = _s4fs.cH;
- S.zIndex = _s4fs.zI;
- W.style.overflow = _s4fs.zI;
+ S.zIndex = _s4fs.czI;
+ W.style.overflow = _s4fs.W;
  Touch_Buttons = _s4fs.TB;
- q.innerHTML = _s4fs.ophtm;
- kbhnt.cur = _s4fs.ophtm.kbh;
+ 
+ q.innerHTML = _s4fs.opthtm;
+ setTimeout('_setRetValues()',999);
+ 
+ kbhnt.cur = _s4fs.kbh;
  if(kbhnt.cur) { kbhnt.cur = !kbhnt.cur; kbShow() };	// Turn on
  
  v=GE("kbimage");
@@ -665,6 +679,15 @@ if(sound.On!=(soundOn==1) /*Global UI */) {
 	}
 }
 
+function _setRetValues() {
+
+ GE("Speed_opts").value = _s4fs.Speed_opts;
+ GE("usercolor").value = _s4fs.usercolor;
+ GE("userchars").value = _s4fs.userchars;
+ GE("usergames").value = _s4fs.usergames;
+ 
+}
+
 
 function userGames(file) {
 
@@ -742,6 +765,7 @@ function download_uknc() {
 }
 
 function openFullscreen() {
+
   var E = document.documentElement;
   if(E) {
   if (E.requestFullscreen) E.requestFullscreen();
