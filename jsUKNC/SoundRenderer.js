@@ -41,7 +41,8 @@ SoundRenderer = function()
   var context = null;
   
   self.On = false;	// sound on or off
-  
+
+  self.dirty = false;
   self.covox = false;
   self.cycles = 0;
   self.initpause = 0;	// pause, if too slow
@@ -224,6 +225,7 @@ SoundRenderer = function()
 			val += c;
 		
 			g = val;
+
 			g /= 10;				// This sounds much better
 
 			}
@@ -243,8 +245,10 @@ SoundRenderer = function()
 		
 		g = val;
 				
-		g = (g&255)>>>0;
-		g /= 128;				// This sounds much better
+		if(!self.dirty) {
+			g = (g&255)>>>0;
+			g /= 128;				// This sounds much better
+			}
 
 		}
 	else g = (A/xCPS);	// 1 channel
@@ -267,7 +271,12 @@ SoundRenderer = function()
   /*void*/this.updateCovox = function(/*int*/value) {
     self.updateTimer();
     var v = (value&255)>>>0;
-    covoxVal = v; 				//(v&128 ?v-256:v);
+	if( self.dirty ) {
+		covoxVal = (v&128 ?v-256:v);
+	}
+	else {
+		covoxVal = v;
+	}
   }
 
   
