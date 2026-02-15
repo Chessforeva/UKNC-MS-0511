@@ -114,6 +114,7 @@ var WindoW = winWiHi();
  
  <select id="userboot" title="Booting options" onchange="userBoot()">
   <option value="UKB">ROM + Basic</option>
+  <option value="aDSK0">Add Basic empty disk</option>
   <option value="UKZ">ROM + Menu</option>
   <option value="FScr">Go FullScreen</option>
   <option value="RST">Reset restart (F12)</option>  
@@ -467,6 +468,7 @@ function userChars() {
 function userBoot() {
  switch(GE("userboot").value) {
  case "UKB": Board.LoadFromImage(UkncBasic,1); scr.DRAW(); break;
+ case "aDSK0": LOADDSK = ["EMPTY.zip"]; GoDisks(); break;
  case "UKZ": Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
  case "FScr": openFullscreen(); break;
  case "RST": Board.Reset(); scr.DRAW(); break;
