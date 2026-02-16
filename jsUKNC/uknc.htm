@@ -114,12 +114,14 @@ var WindoW = winWiHi();
  
  <select id="userboot" title="Booting options" onchange="userBoot()">
   <option value="UKB">ROM + Basic</option>
-  <option value="aDSK0">Add Basic empty disk</option>
   <option value="UKZ">ROM + Menu</option>
-  <option value="FScr">Go FullScreen</option>
+  <option value="aDSK0">Add empty disk</option>
+  <option value="*1">--------------------</option>
+  <option value="FScr">FullScreen (Alt+Enter)</option>
   <option value="RST">Reset restart (F12)</option>  
   <option value="RLD">Reload clear all</option>
   <option value="DBG">Debug (F9)</option>
+  <option value="*2">--------------------</option>
   <option value="net11">Net11rt system disk</option>  
   <option value="PAF">PAF commander</option>
   <option value="SC">SC commander</option>
@@ -133,7 +135,8 @@ var WindoW = winWiHi();
   <option value="HDD1">Ide HDD boot sample</option>
   <option value="HDD2">HDD can copy to</option>
   <option value="ADOS">ADOS, WDX for HDD</option>
-  <option value="CasBAS">Basic cartridge</option>
+  <option value="CasBAS">Add Basic cartridge</option>
+  <option value="*3">--------------------</option>
   <option value="Cheat">How to cheat lives!</option>
  </select>
 
@@ -466,29 +469,30 @@ function userChars() {
 // User GUI cases
 //----------------
 function userBoot() {
- switch(GE("userboot").value) {
+ var O = GE("userboot"); 
+ switch(O.value) {
  case "UKB": Board.LoadFromImage(UkncBasic,1); scr.DRAW(); break;
- case "aDSK0": LOADDSK = ["EMPTY.zip"]; GoDisks(); break;
  case "UKZ": Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
- case "FScr": openFullscreen(); break;
+ case "aDSK0": LOADDSK = ["EMPTY.zip"]; GoDisks(); O.value = "*1"; break;
+ case "FScr": openFullscreen(); O.value = "*1"; break;
  case "RST": Board.Reset(); scr.DRAW(); break;
  case "RLD": document.location.href = href.split('?')[0]; break;
+ case "DBG": dbg.show(); O.value = "*2"; break;
  case "net11": goDsks(["net11rtA.zip","net11rtB.zip"]); break;
  case "PAF": goDsks([ "PAF0.zip","PAFa.zip"]); scr.setCol(3); break;
  case "SC": goDsks([ "SC0.zip","SCa.zip"]); break;
  case "RC": goDsks([ "RC0.zip","RCa.zip"]); break;
+ case "EDT": goDsks(["PAF0.zip","Editor0.zip","EditorA.zip"]); break;
  case "PLY": goDsks(["PAF0.zip","PolyssA.zip","PolyssB.zip"]); break;
  case "MUZ": goDsks(["Muz0.zip","MuzA.zip"]); soundOn=1; break;
- case "EDT": goDsks(["PAF0.zip","Editor0.zip","EditorA.zip"]); break;
  case "MTH": goDsks(["net11rtA.zip","MathA.zip","MathB.zip"]); break;
  case "TB": goDsks(["TurboBasic0.zip","TurboBasicA.zip"]); break;
  case "BBCbas": goDsks(["BBCbasic.zip"]); break;
  case "HDD1": goDsks(["HDD2MB.zip"]); break;
  case "HDD2": goDsks(["IDHDDMNG.zip","HDD2MB.zip","idmngr.zip"]); break;
  case "ADOS": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
- case "DBG": dbg.show(); break;
  case "CasBAS": LOADDSK = ["bascart.zip"]; GoDisks(); break;
- case "Cheat": cheats.cheathelp(); break;
+ case "Cheat": cheats.cheathelp(); O.value = "*3"; break;
  }
 }
 
@@ -510,6 +514,7 @@ function userLoop3sec()
  
 if(FullScreen) {
 
+ if(FullScreen==0.5) { openFullscreen(); return; }
  if(FullScreen==1) {
  
  WindoW = winWiHi();

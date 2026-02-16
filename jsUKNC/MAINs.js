@@ -91,7 +91,7 @@ var kwas=0;		// to prevent default browser action
 
 
 if(e.keyCode==76 && e.ctrlKey) cheats.livesfinder();
-else if(e.keyCode==13 && (e.altKey || e.ctrlKey)) FullScreen=1;
+else if(e.keyCode==13 && (e.altKey || e.ctrlKey)) FullScreen=0.5;
 else {
 
 	if(e.type=="keydown") keyboard.keyHit(e);
