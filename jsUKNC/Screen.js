@@ -132,7 +132,7 @@ var GrayColors = Rgb32( /*16 x 8 */ copy8(
 this.init = function() {
 
 	CS = GE("UKNC_canvas");
-	CX = CS.getContext('2d');
+	CX = CS.getContext('2d',{ willReadFrequently: true });
 	gDATA = CX.getImageData(0, 0, 640, 288);	// get UKNC screen once
 	
 	for(var i=0; i<307; i++) {
