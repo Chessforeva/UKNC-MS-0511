@@ -68,8 +68,12 @@ Gbin.onGot=function(filename, bytes)
 		if(n>0) {
 			var cn = Board.get_free_cart_N();		// also load Cartridge ROM for HDD (ID, not WD)
 			if(cn==n) {
-					// the file "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
-				Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);	
+						// the file "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
+						Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);
+						
+						// the file "ide_wdromv0110.bin"
+						//Board.LoadROMCartridge(n,"ide_wd.bin",IdeWDbootCart);
+
 				}
 			HardDrives[n-1].AttachImage(filename, bytes);
 			HDs = true;
@@ -91,7 +95,7 @@ var kwas=0;		// to prevent default browser action
 
 
 if(e.keyCode==76 && e.ctrlKey) cheats.livesfinder();
-else if(e.keyCode==13 && (e.altKey || e.ctrlKey)) FullScreen=0.5;
+else if(e.keyCode==13 && (e.altKey || e.ctrlKey) && FullScreen==0 ) FullScreen=0.5;
 else {
 
 	if(e.type=="keydown") keyboard.keyHit(e);

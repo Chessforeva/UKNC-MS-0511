@@ -38,7 +38,13 @@ Cheats = function(){
  this.livesfinder = function() {
  
   var a=lv_dmp;
-  a.a[a.c++] = [ RAM[0].slice(), RAM[1].slice(), RAM[2].slice() ];
+  a.a[a.c] = [ RAM[0].slice(), RAM[1].slice(), RAM[2].slice() ];
+  var memChr = prep_arr_str(a.a[a.c]);
+  // to look the dump into Developers Tools of the browser
+  console.log(memChr);
+
+  a.c++;
+  
   if(a.c==3) {
 	var f=0, s="";
 	lv_cht = [];
@@ -52,8 +58,8 @@ Cheats = function(){
 		}
 	}
 	if(f) alert("Found "+f+" addresses, cheating now!" + s);
-	else s="not found\n";
-	LOG(s);
+	else alert("Found nothing.");
+	if(s.length) LOG(s);
 	
 	a.c=0;
 	}
@@ -76,6 +82,17 @@ Cheats = function(){
  }
  
  
+ function prep_arr_str( arr ) {
+	var b = [], z="          ";
+	for(var i=0;i<arr[0].length;i++) {
+		var s=(z+(i<<1)).slice(-10) + ": ";
+		for(var k=0;k<3;k++) s+=(z+arr[k][i]).slice(-10);
+		b[i]=s;
+	}
+	b[++i] ='addr :  RAM 0   RAM 1   RAM 2';
+	return b.join('\n');
+ }
+
  this.hack = function() {
  
  var f = self.FileName;
@@ -85,6 +102,12 @@ Cheats = function(){
 	RAM[0][65535]=200;	// we know this file
 	subst_ShiftSpace();	// if Knight then substitute keys
 	RAM[1][10089] = 8;	// hack lives
+	}
+
+ /* river.uknc */	
+ if( f=="river.uknc" || RAM[0][65535]==220 ) {
+	RAM[0][65535]=220;	// we know this file
+	subst_ShiftSpace();	// if River then substitute keys
 	}
 	
 if( f=="arkanoid.uknc" || RAM[0][65535]==201 ) {
@@ -115,7 +138,7 @@ if( f=="boa.uknc" || RAM[0][65535]==205 ) {
 	keyboard.Subst_Key(38/*Up*/, 101/*Numpad 8*/); touch_Subst_Key(108/*default up arrow*/,101);
 	keyboard.Subst_Key(40/*Down*/, 104/*Numpad 5*/); touch_Subst_Key(92/*default down arrow*/, 104);
 	}
-	
+
  livescheat();	// lives cheating tool
 
  }

@@ -22,6 +22,7 @@ UKNC Elektronika MS-0511 emulator HTML5 javascript
 v.1.b 
 04.2021 - v.1.a
 02.2026 - fullscreen exit to the main window
+03.2026 - v.2 sounds addition
 )
 
 Not any right reserved:)
@@ -40,7 +41,7 @@ Itogo:
  
   NO TAPE. Standard FLOPPY DISKS.
   HDD IDE compatible via driver.
-  Poor speaker sound.
+
   
 Soviet school computer during 80s-90s.
 2 CPUs ~8MHz 16 bit !
@@ -65,6 +66,7 @@ Soviet school computer during 80s-90s.
 <script src="Speed.js"></script>
 <script src="DBG.js"></script>
 <script src="MAINs.js"></script>
+<script src="AY8910.js"></script>
 <script src="SoundRenderer.js"></script>
 <script src="Touches.js"></script>
 <script src="Cheats.js"></script>
@@ -128,6 +130,10 @@ var WindoW = winWiHi();
   <option value="RC">RC commander</option>
   <option value="EDT">Text Editor</option>
   <option value="PLY">GraphEdit Polyss</option>
+  <option value="BdAp">Bad Apple demo</option>
+  <option value="TimeCS">TimeCS AY Music (-bugz)</option>
+  <option value="Cvx1">Covox sample1</option>
+  <option value="Cvx2">Covox sample2</option>
   <option value="MUZ">Music Editor</option>
   <option value="MTH">Math.Equations</option>
   <option value="TB">TurboBasic(Menu=Esc)</option>
@@ -159,12 +165,10 @@ var WindoW = winWiHi();
 
  <select id="Speed_opts" title="Set cycles per second" onchange="optSpeed()">
   <option title="As the original UKNCBTL" value="UKNCBTL">1) Properly!</option>
-  <option title="Optimized" value="S1_100">2) 1Kx100</option>
-  <option title="Optimized" value="S2_120">3) 2Kx120</option>
-  <option title="Optimized" value="S4_160">4) 4Kx160</option>
-  <option title="Optimized" value="S6_200">5) 6Kx200</option>
-  <option title="Optimized" value="S10_240">6) 10Kx240</option>
-  <option title="Optimized" value="S20_250">7) 20Kx250</option>
+  <option title="Optimized" value="S1_100">2) 1K x 100</option>
+  <option title="Optimized" value="S2_120">3) 2K x 120</option>
+  <option title="Optimized" value="S4_160">4) 4K x 160</option>
+  <option title="Optimized" value="S6_200">5) 6K x 200</option>
  </select>
 </td>
 
@@ -196,26 +200,32 @@ var WindoW = winWiHi();
 	onchange="userGames()">
   <option value="">♠♣♥♦ Games ♠♣♥♦</option>
   <option value="knight.zip">Knight</option>
-  <option value="lode3.zip">Lode runner</option>
+  <option value="loderunner.zip">Lode runner</option>
   <option value="newtetris.zip">Tetris</option>
-  <option value="krakout.zip">Krakout</option>
+  <option value="krakout">Krakout Music!</option>
+  <option value="boulder2.zip">BoulderDash 2</option>  
   <option value="welltris.zip">Welltris</option>
+  <option value="hwyenc.zip">Highway Encounter</option>
+  <option value="desolate.zip">Desolate</option>
   <option value="lasthero.zip">Last Hero</option>
-  <option value="columns.zip">Columns</option>
+  <option value="express.zip">Express</option>
+  <option value="columns2.zip">Columns2</option>
+  <option value="river.zip">River shooter</option>
   <option value="gm40">40 games</option>
   <option value="king.zip">Korolevstvo</option>
   <option value="zvzdpatrol.zip">Zvezdn.Patrul.</option>
   <option value="gxonix.zip">GXonix</option>
   <option value="mklad.zip">Klad</option>
   <option value="arkanoid.zip">Arkanoid</option>
-  <option value="bolder.zip">Bolder</option>
+  <option value="boulder.zip">Boulder Dash</option>
   <option value="sokoban.zip">Sokoban</option>
   <option value="puckman.zip">Puckman</option>
-  <option value="hwyenc.zip">HwyEnc demo</option>
   <option value="cline.zip">ColorLines</option>
+  <option value="columns.zip">Columns</option>
   <option value="saper.zip">Saper mines</option>
   <option value="goblin.zip">Zamok Goblin.</option>
   <option value="boa.zip">Boa snake</option>
+  <option value="miner2.zip">Miner</option>
   <option value="mine.zip">Mine sweeper</option>
   <option value="land.zip">Land</option>
   <option value="kotribalov.zip">Kot Ribolov</option>
@@ -240,9 +250,23 @@ var WindoW = winWiHi();
 
   </div>
   <input type="checkbox" id="soundonoff" class="Ckbx"
-	title="Turn the beeper (on|off)"
-	onclick="soundOn^=1;">Beeper 
-  
+	title="Turn sound (on|off)"
+	onclick="soundOn^=1;snd();snd_mode();">Sound...
+	
+ <select id="soundcard" title="Sound extras" disabled onclick="snd();">
+   <option value="none"></option>
+   <option value="8910mx">AY8910mix</option>
+   <option value="8910c3">3channels</option>
+<!--  <option value="8910ps">- 3ch.+wait</option>  -->
+   <option value="cvx">Covox</option>
+   <option value="---">-----</option>
+   <option value="bpr">Beeper</option>
+ </select>
+ <select id="soundlast" title="Lasting sound" disabled onclick="snd();sndlast();">
+  <script type="text/javascript">
+   for(var i=1; i<=8; i++) document.write( '<option value="'+i+'t">'+i+'t</option>' );
+  </script>
+ </select>
  </font></td>
 
 </tr>
@@ -277,7 +301,6 @@ function GE(id) { return document.getElementById(id); }
 
 var FullScreen = 0;	// Ctrl+Enter switch to FullScreen mode
 var LOADDSK = [];	// to know disks to load
-var soundOn = 0;	// sound off mostly, uknc has not good sound capabilities
 
 // prevent selections
 window.oncontextmenu = function(e) {
@@ -305,24 +328,29 @@ Ppu.MC = new MemoryController(1);		// PPU memory control
 var HardDrives = [];		// 2 HDD can be attached
 var HDs = false;			// global, is any HD attached?	
 
+var speed = new Speed();
+
 var Board = new Motherboard();
 var FloppyCtl = new FloppyController();
-
 
 Board.Reset();
 Board.LoadROM(UkncROM);				// read UNKC_ROM.bin 32KB
 
 var scr = new Screen();				// Screen.js
-var sound = new SoundRenderer();	// Sound generator
 
 var disasm = new Disasm();
 var dbg = new DBG();
 var trace = new Trace();	// in DBG.js
-
-var speed = new Speed();
-speed.setOptimize(1);	// the default speed is optimized
  
 Board.LoadFromImage( UkncBasic,1 );
+
+speed.setOptimize(1);	// the default speed is optimized
+
+var soundOn=0;		// Sound Off
+var sound_sv = "none";	// Save last value
+var sound_last = "1t";
+
+
 
 function loaded() {
  var D=GE("dropfile"), O=GE("UKNC_canvas"), o=GE("debug_div"), v=GE("kbimage"), y=GE("options");
@@ -397,7 +425,7 @@ function kbPressed(e)
 		
 	if(hold && kbhnt.holdkey) hold = 0;		// if previous was hold already, release keys
 	if(!hold) setTimeout('clrKbv()',300);
-	pushKey(o.cd, hold);
+	pushKey(o.cd, hold); console.log("Keycode="+o.cd);
 	if( kbhnt.holdkey ) popKey(kbhnt.holdkey);
 	kbhnt.holdkey = hold;
 	}
@@ -440,11 +468,8 @@ function optSpeed() {
 	case "S2_120": S.set(125,120); break;
 	case "S4_160": S.set(250,160); break;
 	case "S6_200": S.set(375,200); break;
-	case "S10_240": S.set(625,240); break;
-	case "S20_250": S.set(1250,250); break;
 	}
 	S.setOptimize( (v=="UKNCBTL" ? 0:1 ) );
-	if(v) soundOn=0;
 }
 
 function userColor() {
@@ -484,11 +509,20 @@ function userBoot() {
  case "RC": goDsks([ "RC0.zip","RCa.zip"]); break;
  case "EDT": goDsks(["PAF0.zip","Editor0.zip","EditorA.zip"]); break;
  case "PLY": goDsks(["PAF0.zip","PolyssA.zip","PolyssB.zip"]); break;
- case "MUZ": goDsks(["Muz0.zip","MuzA.zip"]); soundOn=1; break;
+ case "BdAp": goDsks(["BadApple.zip","BadApplea.zip"]);
+   soundOn=0;snd();snd_mode();GE("soundonoff").disabled = true;
+   break;
+ case "TimeCS": goDsks(["timeCS.zip","timeCSa.zip"]); sound_sv = "8910mx"; break;
+ case "Cvx1": goDsks(["covox.zip"]); sound_sv = "cvx"; break;
+ case "Cvx2": goDsks(["covox2.zip"]); sound_sv = "cvx"; break;
+ case "MUZ": goDsks(["Muz0.zip","MuzA.zip"]); break;
  case "MTH": goDsks(["net11rtA.zip","MathA.zip","MathB.zip"]); break;
  case "TB": goDsks(["TurboBasic0.zip","TurboBasicA.zip"]); break;
  case "BBCbas": goDsks(["BBCbasic.zip"]); break;
- case "HDD1": goDsks(["HDD2MB.zip"]); break;
+ case "HDD1":
+    setTimeout('pushKey(25)',3000);
+    goDsks(["HDD2MB.zip"]);
+    break;
  case "HDD2": goDsks(["IDHDDMNG.zip","HDD2MB.zip","idmngr.zip"]); break;
  case "ADOS": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
  case "CasBAS": LOADDSK = ["bascart.zip"]; GoDisks(); break;
@@ -510,7 +544,7 @@ _s4fs = {};	// Save for fullscreen values
 // on each loop update option values
 function userLoop3sec()
 {
- var Q,m,n,i,j,s,o,v;
+ var Q,O,m,n,i,j,s,o,v;
  
 if(FullScreen) {
 
@@ -598,6 +632,9 @@ if( FullScreen==5 ) {	// Return the main window
  
  v=GE("kbimage");
  v.addEventListener( (TOUCH_ ? "touchstart" : "mousedown"), kbPressed, false);
+
+ O = GE("soundlast");
+ O.value = sound_last;
  
  }
 
@@ -668,22 +705,51 @@ if(Q!=null) {
 	Q.checked = NUMPAD;
 	}
 
-Q = GE("soundonoff");
-if(Q!=null) {
-	Q.checked = soundOn;
-	if(soundOn) speed.setOptimize(0);
+Q = GE("soundonoff"); n=(soundOn==1);
+ if(Q!=null) if(n!=Q.checked) { 
+	Q.checked=(n==1); snd();
 	}
-	
-Q = GE("Speed_opts");
-if(Q!=null) {
-	if(speed.Optimize==0) Q.value="UKNCBTL";
-	else soundOn=0;		// turn off sound
+ 
+ Q = GE("soundcard");
+ O = GE("soundlast");
+ if(Q!=null) {
+	var snd_curr = Q.value;
+	if(!soundOn) { Q.value="none"; snd(); }
+	else if(Q.value=="none") {
+		if(sound_sv!="none") v = sound_sv; 
+		else {
+			g = Board.getSoundGuess();
+			v="8910mx";
+			if(g&2) v="8910c3";
+			if(g&4) v="cvx";	// don't know it
+			}
+		Q.value= v;
+		}
+	n=Q.value;
+	if(n!="none") sound_sv=n;
+	o=(n.substr(0,4)=="8910");
+	m=n.indexOf("ps")>0;
+	Board.sounds( o, n.indexOf("mx")>0, m, n=="cvx", n=="bpr" );
+	if(soundOn && n=="bpr") {
+		// Sounds like garbage. Just to identify sounds.
+		//GE("Speed_opts").value="UKNCBTL";
+		//optSpeed();
+		}
+	Q.disabled=(soundOn==0);
+	if(m) setTimeout('snd3cn()',1000);		// too smart
+	if(snd_curr!=Q.value) snd();	// clear
+	if(n=="cvx" || n=="bpr") {
+		O.value = sound_last;
+		O.disabled = (soundOn==0);
+		}
+	else {
+		sound_last = "1t";
+		O.value = sound_last;
+		sndlast();
+		O.disabled = true;
+		}
 	}
 
-if(sound.On!=(soundOn==1) /*Global UI */) {
-	if(!soundOn) { sound.clear(1); sound.adjConstSpeed(); } 
-	sound.setSound(soundOn);
-	}
 }
 
 function _setRetValues() {
@@ -700,17 +766,21 @@ function userGames(file) {
 
 	var f = file || GE("usergames").value;
 	
+	sound_sv = "bpr";
+	
 	Board.Reset();
 	FloppyCtl.detach();
 	
 	switch(f) {
 	case "gm40": goDsks(["gm40a.zip","gm40b.zip"]); return;
+	case "krakout": goDsks(["krakout.zip","krakout2.zip"]); sound_sv = "8910c3"; return;	
 	case "king.zip":
 	case "zvzdpatrol.zip":
 	case "kotribalov.zip":
 	case "land.zip":
 		NUMPAD = 1; break;
-	case "hwyenc.zip":
+	case "hwyenc.zip": goDsks(["hwyenc.zip","hwyenca.zip"]); return;
+	case "desolate.zip":	
 	case "ITO90.zip":
 		Board.LoadFromImage( UkncZagruzka,1 ); break;
 	case "GMbst": goDsks(["GMbstA.zip","GMbstB.zip","GMbstC.zip"]); return;
@@ -738,6 +808,24 @@ function kbShow() {
 	kbhnt.holdkey = 0;
 	}
 }
+
+function snd() {
+	Board.soundClear();
+	}
+
+function snd_mode() {
+	if(soundOn) {
+		var Q = GE("Speed_opts"), v = Q.value;
+		if( v.substr(1,3)=="MHz" ) { Q.value="S6_200"; optSpeed(); }
+	}
+ }
+function snd3cn() { GE("soundcard").value="8910c3"; }
+
+function sndlast() {
+ sound_last = GE("soundlast").value;
+ Board.setSoundLasting( parseInt(sound_last) );
+}
+
 
 
 function download_dsk(i) {

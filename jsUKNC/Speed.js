@@ -23,7 +23,8 @@ Speed = function() {
 	this.tck = 0;		/* ticker [0..60] */
 	
 	this.Ticks = 0;		/* real CPU + PPU cycles per second performed */
-	this.avg_Hz = 0;	/* average */
+	this.avg_ticks = 0;	/* average */
+	this.avg_Hz = 0;	/* in Hz */
 	
 
 	
@@ -69,10 +70,11 @@ Optimize=0
 
   this.adjust = function() {
 
-	self.avg = (self.Ticks>>>1)/M;		/* CPU, PPU can calculate Bps */
+	self.avg_ticks = (self.Ticks>>>1);		/* CPU, PPU can calculate Bps */
+	self.avg_Hz = self.avg_ticks/M;			/* in Hz */
 	self.Ticks = 0;
 	var q = GE("MHZshow");
-	if(q!=null) q.innerHTML = '(oz#' + self.Optimize + ') ~' + self.avg.toFixed(1) + '<font size="1">Mhz</font>';
+	if(q!=null) q.innerHTML = '(oz#' + self.Optimize + ') ~' + self.avg_Hz.toFixed(1) + '<font size="1">Mhz</font>';
 	}
   
   this.initTicker = function() {
@@ -101,7 +103,7 @@ Optimize=0
 	this.setOptimize = function(n) {
 			self.Optimize=n;
 			recalc();
-			sound.adjConstSpeed();
+			Board.adjConstSpeed(n);
 			}
 			
 	function recalc() {			// recalculates loop values

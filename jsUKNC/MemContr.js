@@ -38,11 +38,13 @@ var Port = {
     /*uint8_t*/
 	o177100:0,  // i8255 port A -- Parallel port output data
 	o177101:0,  // i8255 port B
-	o177102:0	// i8255 port C
+	o177102:0,	// i8255 port C
 	
 	// port o177710 = Timer.flags
 	// port o177712 = Timer.reload
 	// port o177714 = Timer.Tick
+	
+	o177372:0 // Covox for Aberrant Sound Module, but not sure
 	
 };
 
@@ -978,6 +980,14 @@ init1();	// now
         return Port.o177102 & 0xF;
     case 65091 /*0177103*/ :  // i8255 control
         return 0;
+		
+    case 65264 /*0177360*/:  // Sound AY
+    case 65266 /*0177362*/:
+    case 65268 /*0177364*/:
+        return 0; //Board.GetSoundAYVal
+		
+    case 65274 /*177372*/:
+	    return Port.o177372;				// Covox for Aberrant Sound Module, but not sure
 
     case 65472 /*0177700*/ :
     case 65473 /*0177701*/ :
@@ -1129,6 +1139,7 @@ init1();	// now
 
     case 65088 /*0177100*/ :  // i8255 port A -- Parallel port output data
        Port.o177100 = (word & 255);
+	   Board.updateCovox(word & 255);
         break;
     case 65089 /*0177101*/ :  // i8255 port B
         break;
@@ -1146,6 +1157,17 @@ init1();	// now
     case 65115 /*0177133*/ :
         FloppyCtl.WriteData(word);
         break;
+		
+    case 65264 /*0177360*/:  // Sound AY
+    case 65266 /*0177362*/:
+    case 65268 /*0177364*/:
+        Board.SetSoundAYVal((address >>> 1) & 3, b);
+        break;
+		
+    case 65274 /*177372*/:
+		Port.o177372 = (word & 255);
+        Board.updateCovox(word & 255);		// Covox for Aberrant Sound Module, but not sure
+		break;
 
     case 65472 /*0177700*/ :  // Keyboard status
     case 65473 /*0177701*/ :
@@ -1318,6 +1340,7 @@ init1();	// now
 
     case 65088 /*0177100*/ :  // i8255 port A -- Parallel port output data
        Port.o177100 = (word & 255);
+	   Board.updateCovox(word & 255);
         break;
     case 65089 /*0177101*/ :  // i8255 port B
         break;
@@ -1326,6 +1349,7 @@ init1();	// now
         break;
     case 65091 /*0177103*/ :  // i8255 control byte
        Port.o177100 = 255; /*0377*/   // Writing to control register resets port A
+	   Board.updateCovox(255);
         break;
 
     case 65112 /*0177130*/ :  // FDD status
@@ -1336,7 +1360,18 @@ init1();	// now
     case 65115 /*0177133*/ :
         FloppyCtl.WriteData(word);
         break;
-
+		
+    case 65264 /*0177360*/:  // Sound AY
+    case 65266 /*0177362*/:
+    case 65268 /*0177364*/:
+        Board.SetSoundAYReg((address >>> 1) & 3, word & 0xFF);
+        break;
+		
+    case 65274 /*177372*/:
+		Port.o177372 = (word & 255);
+        Board.updateCovox(word & 255);		// Covox for Aberrant Sound Module, but not sure
+		break;
+		
     case 65472 /*0177700*/ :  // Keyboard status
     case 65473 /*0177701*/ :
         if (((Port.o177700 & 64 /*0100*/ ) == 0) && (word & 64 /*0100*/ ) && (Port.o177700 & 128 /*0200*/))

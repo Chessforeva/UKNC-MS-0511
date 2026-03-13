@@ -1,26 +1,17 @@
 /*
 
- This is taken from the sound-rich-BK 0010 version.
- May be used for various Covox or AY developments.
- Now it is poor speaker only.
+ Sounds adjusted for Chrome 03.2026
 
 */
 
 SoundRenderer = function()
 {
   var self = this;
-
-  // blank AY object, can be developed
-  var synth = {
-		On: false,	/* can set that there is a AY8910 attached somewhere, or other, and develop various sounds */
-		mixed: false, /*3 channels as one */
-		nextSample:function() {/*get next buffer of values*/}
-		}; 
   
   this.allowClear = true;		// can set not to clear buffer frequently
 
   var /*int*/xCPS = 0;
-
+  var synth = null;
   var P = null;
   
   var B = [];	// real buffer to play
@@ -41,11 +32,17 @@ SoundRenderer = function()
   var context = null;
   
   self.On = false;	// sound on or off
-
+  
   self.dirty = false;
   self.covox = false;
+  self.beeper = false;
+  
   self.cycles = 0;
   self.initpause = 0;	// pause, if too slow
+  
+  var last = [0,0,0];	// lasting sound
+  var Bzc = 0;			// 3 loops only
+  this.sound_last = 1;	// 1 x sample ...
   
   this.setSynth = function(S) { synth = S; }
   
@@ -75,6 +72,31 @@ SoundRenderer = function()
 	}
   
   }
+ 
+  // Claude suggested noise filter for Covox samples
+  //  
+  // Stage 1: One-pole IIR low-pass (runs before push to AudioContext)
+  // alpha ~0.25 for 48kHz = ~600Hz smoothing, tune to taste
+  var Fp = 128;	// previous
+  function lowpass(x) {
+    Fp += 0.25 * (x - Fp);
+    return Fp;
+  }
+
+  // Stage 2: Delta clipper — hard cap on how fast signal can jump per sample
+  var Fl = 128;	// last
+  function deltaClip(x) {
+    var d = x - Fp;
+    if ( (d>=0 ? d : -d) > 25/*MAX_DELTA*/) {
+      Fl += (d>=0 ? 1 : -1) * 25/*MAX_DELTA in -255..255 scale*/;
+    } else Fl = x;
+    return Fl;
+  }
+
+  // Use them in sequence on each value:
+  function FilterNoise(raw) {
+    return deltaClip(lowpass(raw))|0;
+  }
   
   function clear2() {
 	if(!self.initpause) { B = []; Bpos = 0; Bz = 0; }
@@ -82,12 +104,22 @@ SoundRenderer = function()
 	adjspd=0;
 	ofs = 0;
 	Bclr = 0;
+	last = [0,0,0];
   }
 
   this.clear = function(a) {
 	if(a) clear2();
 	else {
-		if(self.allowClear || B.length&0x100000) Bclr++;		// now will wait for silence and then clear
+		if(self.allowClear) Bclr++;	// now will wait for silence and then clear
+		else {
+			if(B.length&0x100000) {
+				var r = Bpos-10240;
+				if(r>0) {
+					B.splice(0,r);
+					Bpos-=r;
+					}
+			 }
+			}
 		}
   }
 	//~every .0232s 
@@ -131,21 +163,26 @@ SoundRenderer = function()
 		}
 
 	  // smooth sound
-	 var last = (p==0 ? 0 :(Chan==1 ? B[p-1] : B[p-1][C]));		// the lasting sound cases
+	 last[C] = (p==0 ? 0 :(Chan==1 ? B[p-1] : B[p-1][C]));		// the lasting sound cases
+	 if(c12) last[1]=last[C];			 
+			 
 	 if(Bz) {
 				// little lasting sound, if emulator too slow
 		while(j<Sz) {
-			if(c12) O2[j]=last;
-			O[j++]=last;
+			if(c12) O2[j]=last[1];
+			O[j++]=last[C];
 			}
+		Bzc = (++Bzc)&3;
+		if(!Bzc) last = [0,0,0];
 		}
+	 else Bzc=0;
 		
 	 if(C==(Chan-1)) {		// adjust counters and buffers
 		
 	 if(Bclr) {
 		switch(Bclr) {
 		case 1: if(j<Sz) clear2(); break;	// if nothing to play, clear
-		case 2: if(last==0) clear2(); break;	// if last sound is 0, also clear
+		case 2: if(last[C]==0) clear2(); break;	// if last sound is 0, also clear
 		}
 	  }
 	 }
@@ -162,8 +199,11 @@ SoundRenderer = function()
   }
   
   function adjustSpeed(c)  {
-	  
-    var spd = (c ? speed.CpuMHZ : speed.avg_Hz);
+	var avg = speed.avg_ticks;
+	var nom = speed.CpuMHZ;
+	
+    var spd = ((c || (avg < (nom>>1)) ) ? nom : avg)
+	spd = nom * 0.025;	// This tune-constant is obtained in practice. Just good for Chrome.
 	
 	/* cycles per sample */
     var C = (spd / 48010)|0; /*better be prepared on time >=48000*/
@@ -172,13 +212,22 @@ SoundRenderer = function()
   }
   
   this.adjConstSpeed = function()  { adjustSpeed(true); };
+  
 
-	// This generates the sound buffer while running present values */
+ /*void*/this.setCovoxVal = function( val ) {
+	 if(val!=255) covoxVal = val;			// control value to be ignored
+  }
+
+ /*void*/this.prepTimer =  function()
+  {
+	self.cycles = CPU_TICK;
+  }
 
  /*void*/this.updateTimer =  function()
   { 
-    var /*long*/cy = 1200;		// a constant value connected to cpu cycles timings
-    var /*int*/xStep = /*(int)*/cy * 4096;
+    var /*int*/xStep = (CPU_TICK - self.cycles) * 4096;
+	CPU_TICK = 0;	// clear
+	
     var /*int*/xRem = xCPS - ofs;
 
     if (xStep < xRem)
@@ -205,6 +254,8 @@ SoundRenderer = function()
 	if(!self.initpause && (++adjspd)>50000) self.clear();
 
      }
+
+    self.cycles = CPU_TICK;
     
     if(!self.covox) covoxVal = 0;
     if(!synth.On) synthVal = 0;
@@ -219,19 +270,18 @@ SoundRenderer = function()
 		synthVal = synth.nextSample();	// 1 mixed or 3 channels
 		if(synth.mixed) {
 			c = synthVal-val;
-			
+
 			// this smoothing filter has been removed, distorts the sound sometimes
-			// val+=(c>32?32: (c<-32?-32:c));
+			//val+=(c>32?32: (c<-32?-32:c));	// smoothing
 			val += c;
-		
+
 			g = val;
-
 			g /= 10;				// This sounds much better
-
+	
 			}
 		else {
+	
 			g = synthVal;		// independent 3 channels, may be slow 
-
 			synthVal=0; val=0;
 			}
 		}
@@ -242,24 +292,25 @@ SoundRenderer = function()
 		// this smoothing filter has been removed, distorts the sound sometimes
 		// val+=(c>32?32: (c<-32?-32:c));
 		val += c;
-		
+
 		g = val;
-				
+		
 		if(!self.dirty) {
 			g = (g&255)>>>0;
-			g /= 128;				// This sounds much better
+			g -= 120;			// add volume. I don't know today about further requirements, so left it as it is.
+			g /= 128;				// These tricks let the browser sound much better
 			}
-
 		}
-	else g = (A/xCPS);	// 1 channel
+	else g = (A/xCPS)/256;	// Beeper. Not so laud.
 
     var q = Chan;
     Chan = (synth.On && !synth.mixed ? 3 : 1);
     if(Chan!=q) clear2();
     
- /* The correct float values should be [-1.0 ... 1.0], but ok anyway. */
- 
-    B.push(g);
+ /* The correct float values should be [-1.0 ... 1.0],
+     but this [-255 ... 255] sounds much better. */
+ 	
+    for( var i=0; i<self.sound_last; i++) B.push(g);
   }
   
   /*void*/this.updateBit = function(/*int*/maskedVal) {
@@ -272,14 +323,18 @@ SoundRenderer = function()
     self.updateTimer();
     var v = (value&255)>>>0;
 	if( self.dirty ) {
-		covoxVal = (v&128 ?v-256:v);
+		covoxVal = ( v&128 ? v-256: v);
 	}
 	else {
-		covoxVal = v;
+		// The current int values are optimal.
+		covoxVal = v;	// don't see any improvements on FilterNoise(v);
 	}
+
   }
 
+  adjustSpeed();
   
   return self;
 
 }
+

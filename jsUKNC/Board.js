@@ -10,6 +10,7 @@ var Timer = {	/*uint16_t*/Tick: 0,	// timer current value, port 177714
 			/*uint16_t*/flags: 0,		// timer status value, port 177710
 			/*uint16_t*/divider: 0
 		};
+var CPU_TICK = 0;				// Ticker for sounds
 		
 // Memory (global for better access
 var /*uint8_t[]*/ RAM = [];		// [3][] RAM, three planes, 64 KB each
@@ -25,6 +26,12 @@ var CartNames = [];
 Motherboard  = function()
 {
 	var self = this;
+	
+  var /*SoundRenderer*/ srend = new SoundRenderer();
+  var /*AY8910*/ synth = new AY8910();
+  var synth_guess = 0;			// 0 - none, 1-speaker, 2 - covox or 8910
+
+	srend.setSynth(synth);
 	
 // Timing
 	var /*uint16_t*/    multiply = 1;
@@ -464,10 +471,16 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 			if(H1.attached) H1.Periodic();
 			}
 
-        if (frameticks % 23 == 0) //AUDIO tick %23
-            DoSound();				// count channels too, if we want to save
-			
-		OtherDevices();
+        if (frameticks % 23 == 0) { //AUDIO tick %23
+			if(srend.On) srend.updateTimer();
+        }
+		
+		// Beeper junk
+		if (frameticks % 3 == 0) {
+			if(srend.beeper) DoBeeperSound();
+		}
+		
+		//OtherDevices();
 		
         frameticks++;
     }
@@ -510,9 +523,11 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 			if(m>Cpu.Tick) m=Cpu.Tick;
 			if(m>3 && m>Ppu.Tick) m=Ppu.Tick;
 			if(m>3 && m>Timer.Tick) m=Timer.Tick;
+			if(m>3 && srend.On && m>srend.cycles) m=srend.cycles;
 			if(m>3) {
 						Cpu.Tick-=m;
 						Ppu.Tick-=m;
+						srend.cycles-=m;
 						i-=m;
 					}
 				}
@@ -548,9 +563,11 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 						if(m>3 && m>Cpu.Tick) m=Cpu.Tick;
 						if(m>3 && m>Ppu.Tick) m=Ppu.Tick;
 						if(m>3 && m>Timer.Tick) m=Timer.Tick;
+						if(m>3 && srend.On && m>srend.cycles) m=srend.cycles;
 						if(m>3) {
 							Cpu.Tick-=m;
 							Ppu.Tick-=m;
+							srend.cycles-=m;
 							i-=m;
 							}
 						}
@@ -568,9 +585,18 @@ Each instruction sets ticker to skip ~30 next ticks. So, skip them, not process.
 			}
 			
 				//AUDIO tick (do not care, just play a game)
-			//if (B % 23 == 0) 
-			//	DoSound();
-
+			if(srend.On) {
+				if (synth.On && (B % 100 == 0)) {
+					if(srend.On) srend.updateTimer();
+				}
+				else if (srend.covox) {
+					srend.updateTimer();
+				}
+				else {
+					if(srend.beeper) DoBeeperSound();	//disabled beeper junk
+				}
+			}
+			
 			//OtherDevices();
 
     }
@@ -1054,9 +1080,9 @@ this.GetScannedKey = function() {
     return res;
 }
 
-function /*void*/ DoSound()
+function /*void*/ DoBeeperSound()
 {
-
+ 
     freq.out[0] = (Timer.Tick >> 3) & 1; //8000
     if (multiply >= 4)
         freq.out[0] = 0;
@@ -1067,7 +1093,7 @@ function /*void*/ DoSound()
     freq.out[3] = (Timer.Tick >> 8) & 1; //250
     freq.out[4] = (Timer.Tick >> 10) & 1; //60
 
-    var /*int*/ g = !(freq.out[0] & freq.enable[0]) & ! (freq.out[1] & freq.enable[1]) &
+    var  g = !(freq.out[0] & freq.enable[0]) & ! (freq.out[1] & freq.enable[1]) &
 		!(freq.out[2] & freq.enable[2]) & !(freq.out[3] & freq.enable[3]) & !(freq.out[4] & freq.enable[4]);
     if (freq.enable[5] == 0)
         g = 0;
@@ -1078,7 +1104,8 @@ function /*void*/ DoSound()
             g = 1;
     }
 
-    if(sound.On) sound.updateBit(g);
+    if(srend.On) srend.updateBit(g);
+
 }
 
 /*void*/ this.SetSound = function(/*uint16_t*/ val)
@@ -1202,8 +1229,11 @@ function OtherDevices() {
 	}
  }
 
-    if ( (sound.On) /*ParallelOut (to printer)*/)
+    if (0 /*ParallelOut (to printer)*/)
         {
+			
+
+
             if ((Port.o177102 & 0x80) == 0x80 && (Port.o177101 & 0x80) == 0x80)
             {
                 // Strobe set, Printer Ack set => reset Printer Ack
@@ -1214,12 +1244,6 @@ function OtherDevices() {
             {
                 // Strobe reset, Printer Ack reset => byte is ready, print it
                 //ParallelOutCb(Port.o177100);
-				
-				// Included for possible Covox tests, but did not find any sample
-				if(sound.On) {
-					sound.covox = true;
-					sound.updateCovox(Port.o177100);
-					}
 					
                 Port.o177101 |= 0x80;  // Set Printer Acknowledge
                 // Now the printer waits for Strobe
@@ -1227,6 +1251,101 @@ function OtherDevices() {
         }
 
 }
+
+//
+// UKNC to BK-0011M  AY8910 register bridge
+// Purely developed by Claude AI.
+//
+var nSoundAYReg = [0, 0, 0];
+var shadowReg7  = [0x38, 0x38, 0x38]; // tone enabled, noise disabled per chip
+
+this.SetSoundAYReg = function(chip, reg) {
+
+	srend.updateTimer();
+	
+	nSoundChip = chip;
+	
+    // Translate chip+reg to single BK AY register index, latch it now
+    var bkReg;
+    switch (reg) {
+        case 0: bkReg = (chip<<1); break; // Tone fine 0/2/4
+        case 1: bkReg = (chip<<1)+1; break; // Tone coarse 1/3/5
+        case 8: bkReg = 8+chip; break; // Volume 8/9/10
+		case 7: bkReg = 7; break;  // Enable - handled specially in SetSoundAYVal
+        default: bkReg = reg; break; // Noise/Enable/Envelope: shared, pass through
+    }
+    synth.setRegIndex(bkReg);
+}
+
+this.SetSoundAYVal = function(chip, val) {
+    
+	srend.updateTimer();
+
+	// Data inversion is BK hardware's job; chip index not needed here,
+    // register was already latched in SetSoundAYReg
+	
+	var reg = nSoundAYReg[chip];
+	if (reg === 7) {
+        // Each chip controls only its own channel bit in reg7.
+        // Chip N's bit0 (tone) BK bit N, chip N's bit3 (noise) BK bit N+3
+        shadowReg7[chip] = val;
+
+        // Extract per-chip tone-enable bit0 and noise-enable bit3, shift to correct position
+/*		
+		// with noises
+		var bkEnable =
+            (((shadowReg7[0] >> 0) & 1) << 0) |  // chip0 tone BK bit0 (ch A)
+            (((shadowReg7[1] >> 0) & 1) << 1) |  // chip1 tone BK bit1 (ch B)
+            (((shadowReg7[2] >> 0) & 1) << 2) |  // chip2 tone BK bit2 (ch C)
+            (((shadowReg7[0] >> 3) & 1) << 3) |  // chip0 noise BK bit3
+            (((shadowReg7[1] >> 3) & 1) << 4) |  // chip1 noise BK bit4
+            (((shadowReg7[2] >> 3) & 1) << 5) |  // chip2 noise BK bit5
+            0xC0;                             // port pins-always inactive
+*/
+
+        // disable noises
+        var bkEnable =
+            (((shadowReg7[0] >> 0) & 1) << 0) |
+            (((shadowReg7[1] >> 0) & 1) << 1) |
+            (((shadowReg7[2] >> 0) & 1) << 2) |
+            0x38 |   // <-- force all noise OFF permanently
+            0xC0;
+			
+        synth.setRegIndex(7);
+        synth.writeReg((bkEnable & 255) >>> 0);
+        return;
+    }
+	
+    synth.writeReg((val & 255) >>> 0);
+	if(chip!=nSoundChip) console.log("AY8910 reg errors");
+}
+
+function initAY() {
+
+	// This init suggestion by Claude comes with sidefects
+	return;
+	
+    // Disable all channels (reg 7 = 0x3F = all tone+noise disabled)
+    synth.setRegIndex(7);
+    synth.writeReg(0x3F);
+
+    // Zero all volumes
+    synth.setRegIndex(8);  synth.writeReg(0);
+    synth.setRegIndex(9);  synth.writeReg(0);
+    synth.setRegIndex(10); synth.writeReg(0);
+
+    // Zero all tone periods
+    synth.setRegIndex(0);  synth.writeReg(0);
+    synth.setRegIndex(1);  synth.writeReg(0);
+    synth.setRegIndex(2);  synth.writeReg(0);
+    synth.setRegIndex(3);  synth.writeReg(0);
+    synth.setRegIndex(4);  synth.writeReg(0);
+    synth.setRegIndex(5);  synth.writeReg(0);
+	
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1449,6 +1568,33 @@ function rdImgChan(C, I, a) {
 
  }
 
+  this.sound_push = function(s) {
+	if(srend.On!=(soundOn==1) /*Global UI */) srend.setSound(soundOn);
+	//else if(srend.On) srend.pushSound();
+	} 
+  this.soundClear = function() { srend.clear(1); srend.adjConstSpeed(); } 
+  this.sounds = function( synthOn, synthMix, synthpaused, covoxOn, beeperOn ) {
+	if(synthOn || covoxOn || beeperOn) { soundOn=1; self.sound_push(); }
+	synth.On = synthOn;
+	srend.covox = covoxOn;
+	srend.beeper = beeperOn;
+	synth.mixed = synthMix;
+	if(synthpaused) srend.initpause = 3333;
+	else if(!soundOn || (!synthOn) || covoxOn) srend.initpause = 0;
+	if(synth.On) initAY();
+	srend.prepTimer();
+	}
+  this.sound_clear_allow = function(yn) { srend.allowClear = yn; }
+  this.setSoundLasting = function(N) { srend.sound_last = N; }
+  this.getSoundGuess = function() { return synth_guess; }
+  this.setDirtyCovox = function() { srend.dirty = true; }
+  this.adjConstSpeed = function(N) { srend.adjConstSpeed() }	// optimize impacts sound, do Nothing
+
+  this.updateCovox = function(val) {
+	  srend.updateTimer();
+	  srend.setCovoxVal(val);
+    }
+  
  return this;
 
 }

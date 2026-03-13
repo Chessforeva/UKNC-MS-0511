@@ -384,7 +384,8 @@ init();		// now, loaded ready
 
     if (!self.IRQ())	{
         self.CmdExe();	// Command Execution
-	}
+		if(self.isCpu) CPU_TICK++;	// for sounds inc. global
+		}
 }
 
 /*bool*/ this.IRQ = function()		// Interrupt processing
