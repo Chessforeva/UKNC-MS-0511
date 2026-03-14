@@ -19,7 +19,7 @@ outline: 0;
 
 <!--
 UKNC Elektronika MS-0511 emulator HTML5 javascript
-v.1.b 
+v.2.0 
 04.2021 - v.1.a
 02.2026 - fullscreen exit to the main window
 03.2026 - v.2 sounds addition
@@ -130,7 +130,7 @@ var WindoW = winWiHi();
   <option value="RC">RC commander</option>
   <option value="EDT">Text Editor</option>
   <option value="PLY">GraphEdit Polyss</option>
-  <option value="BdAp">Bad Apple demo</option>
+  <option value="BdAp">Bad Apple movie demo</option>
   <option value="TimeCS">TimeCS AY Music (-bugz)</option>
   <option value="Cvx1">Covox sample1</option>
   <option value="Cvx2">Covox sample2</option>
@@ -138,11 +138,23 @@ var WindoW = winWiHi();
   <option value="MTH">Math.Equations</option>
   <option value="TB">TurboBasic(Menu=Esc)</option>
   <option value="BBCbas">BBC basic RT11</option>
-  <option value="HDD1">Ide HDD boot sample</option>
+  <option value=" "> </option>
+  <option value="*3">___prepared HDD sets __</option>
+  <option value="HDD1">Ide HDD boot run</option>
   <option value="HDD2">HDD can copy to</option>
-  <option value="ADOS">ADOS, WDX for HDD</option>
+  <option value="ADWD">ADOS, WDR for HDD</option>
+  <option value=" "> </option>
+  <option value="*4">___parts to set HDDs ___</option>
+  <option value="AddIDE">Add IDE rom, drop HDD img</option>
+  <option value="AddWDX">Add WDX HDD rom to a slot</option>
+  <option value="AddDU">Add DU? HDD rom</option>
+  <option value="IDEMNG">Add IDE disk,run IDDRIV</option> 
+  <option value="ADOS">Add ADOS disk,run WDR</option>
+  <option value="SYSWDX">Add syswdx disk</option>
+  
   <option value="CasBAS">Add Basic cartridge</option>
-  <option value="*3">--------------------</option>
+  <option value="RST2">Go restart (F12)</option>    
+  <option value="*5">--------------------</option>
   <option value="Cheat">How to cheat lives!</option>
  </select>
 
@@ -500,7 +512,7 @@ function userBoot() {
  case "UKZ": Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
  case "aDSK0": LOADDSK = ["EMPTY.zip"]; GoDisks(); O.value = "*1"; break;
  case "FScr": openFullscreen(); O.value = "*1"; break;
- case "RST": Board.Reset(); scr.DRAW(); break;
+ case "RST","RST2": Board.Reset(); scr.DRAW(); break;
  case "RLD": document.location.href = href.split('?')[0]; break;
  case "DBG": dbg.show(); O.value = "*2"; break;
  case "net11": goDsks(["net11rtA.zip","net11rtB.zip"]); break;
@@ -524,9 +536,15 @@ function userBoot() {
     goDsks(["HDD2MB.zip"]);
     break;
  case "HDD2": goDsks(["IDHDDMNG.zip","HDD2MB.zip","idmngr.zip"]); break;
- case "ADOS": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
- case "CasBAS": LOADDSK = ["bascart.zip"]; GoDisks(); break;
- case "Cheat": cheats.cheathelp(); O.value = "*3"; break;
+ case "ADWD": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
+ case "AddIDE": LOADDSK = ["idecart.zip"]; GoDisks(); O.value = "*4";break;
+ case "AddWDX": LOADDSK = ["wdxcart.zip"]; GoDisks(); O.value = "*4";break;
+ case "AddDU": LOADDSK = ["ideducart.zip"]; GoDisks(); O.value = "*4";break;
+ case "IDEMNG": goDsks(["IDHDDMNG.zip"]); break;  
+ case "ADOS": goDsks(["ADos0.zip"]); break;
+ case "SYSWDX": goDsks(["syswdx.zip"]); break;
+ case "CasBAS": LOADDSK = ["bascart.zip"]; GoDisks(); O.value = "*4";break;
+ case "Cheat": cheats.cheathelp(); O.value = "*5"; break;
  }
 }
 

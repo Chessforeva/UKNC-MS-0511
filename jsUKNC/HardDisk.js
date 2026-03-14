@@ -47,8 +47,8 @@ function /*void*/ InvertBuffer(A) {
     tm_cnt = 2;
     tm_evt = IDE.TIMEEVT.RESET_DONE;
 	
-	self.bytesAll = [];
-	self.attached = false;
+	//self.bytesAll = [];
+	//self.attached = false;
 }
 
 /*bool*/this.AttachImage = function(/*string*/ FileName, /*Uint8array*/ bytes )

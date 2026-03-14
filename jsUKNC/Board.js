@@ -129,7 +129,7 @@ init();		// now
     FloppyCtl.Reset();
 	HardDrives[0].Reset();
 	HardDrives[1].Reset();
-	HDs = false;
+	//HDs = false;
 	
 	Timer.Tick = 0;
 	Timer.reload = 0;
@@ -234,7 +234,7 @@ this.LoadROMCartridge = function(/*int*/ cartno, FileName, /*uint8_t*/ bBuffer) 
 this.CartInfo = function() {
 	var s = "";
 	for(var i in ROMCart) {
-		if(ROMCart[i].length) s+='<font color="white">['+i+':'+ CartNames[i] + ']</font> ';
+		if(ROMCart[i].length) s+='<font color="white">[Slot '+(parseInt(i)+1)+':'+ CartNames[i] + ']</font> ';
 		}
 	return s;
 }
