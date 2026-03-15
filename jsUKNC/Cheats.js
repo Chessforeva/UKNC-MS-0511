@@ -74,13 +74,12 @@ Cheats = function(){
 		}
  }
  
- function subst_ShiftSpace() {
+ function subst_RightShift_Space() {
 	if((FLAGS&1)==0) {
 		keyboard.Subst_Key(32, 69); touch_Subst_Key(75, 69);
 		FLAGS|=1;
 	}
  }
- 
  
  function prep_arr_str( arr ) {
 	var b = [], z="          ";
@@ -100,19 +99,21 @@ Cheats = function(){
  /* Knight.uknc */
  if( f=="knight.uknc" || RAM[0][65535]==200 ) {
 	RAM[0][65535]=200;	// we know this file
-	subst_ShiftSpace();	// if Knight then substitute keys
+	subst_RightShift_Space();	// if Knight then substitute keys
 	RAM[1][10089] = 8;	// hack lives
+	var d = TOUCH_CTRL.disabled;
+	//if(!d.length) d.push('key_f1');	// disable F1 sleep on touch
 	}
 
  /* river.uknc */	
  if( f=="river.uknc" || RAM[0][65535]==220 ) {
 	RAM[0][65535]=220;	// we know this file
-	subst_ShiftSpace();	// if River then substitute keys
+	subst_RightShift_Space();	// if River then substitute keys
 	}
 	
 if( f=="arkanoid.uknc" || RAM[0][65535]==201 ) {
 	RAM[0][65535]=201;
-	subst_ShiftSpace();
+	subst_RightShift_Space();
 	RAM[2][9062] = 112;	// hack lives (not sure)
 	}
 
@@ -128,7 +129,7 @@ if( f=="gxonix.uknc" || RAM[0][65535]==203 ) {
 	
 if( f=="lasthero.uknc" || RAM[0][65535]==204 ) {
 	RAM[0][65535]=204;
-	subst_ShiftSpace();
+	subst_RightShift_Space();
 	}	
   
 if( f=="boa.uknc" || RAM[0][65535]==205 ) {
@@ -156,5 +157,13 @@ if( f=="boa.uknc" || RAM[0][65535]==205 ) {
 }
 
 
+//To hook heypresses
+function cheats_onPress(key) {
+	
+}
 
+
+function cheats_onRelease(key) {
+	
+}
 

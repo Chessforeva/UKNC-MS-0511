@@ -14,7 +14,13 @@ function FPSinit()
 //--------------------
 function FPSloop( onetime )
 {
-  if(!dbg.active) {
+  if(TOUCH_CTRL.infoactivated) {
+	  
+	  if( (--TOUCH_CTRL.infoactivated)==0 ) scr.DRAW();
+  }
+  else {
+	
+   if(!dbg.active) {
     
 		// let the CPU, PPU perform a bunch of cycles
 	if(!( speed.Optimize ? Board.SystemFrame() : Board.SystemFrame_ukncbtl() )) {
@@ -24,9 +30,10 @@ function FPSloop( onetime )
 		}
 	
    speed.disks_adjust();					// disk cases for optimizer
-	
+   
    scr.fastDRAW();
    keyboard.processNextKey();		// process queued keys
+   }
   }
 	
   if(!onetime) setTimeout('FPSloop()', 1000/speed.fps );	// next loop after

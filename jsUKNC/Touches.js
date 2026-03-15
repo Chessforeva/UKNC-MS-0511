@@ -5,7 +5,20 @@
 
 
 TOUCH_ = ('ontouchstart' in document.documentElement);
-MOBILE_ = (navigator.userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile/i));
+
+function isMobileDevice() {
+  // Best modern signal: touch-primary device
+  if (window.matchMedia('(pointer: coarse)').matches) return true;
+
+  // Fallback for older browsers without matchMedia
+  if (!window.matchMedia) {
+    return /Android|iPhone|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    // Note: iPad intentionally omitted — iOS 13+ reports as desktop
+  }
+
+  return false;
+}
+MOBILE_ = isMobileDevice();
 
 var EVENT = { type: "", keyCode: 0, which:0, location:0,
  preventDefault: function() {} , stopPropagation: function() {} }; 
@@ -118,7 +131,7 @@ function touchLoads()
   }
 }
 
-function touchShow(to)
+function touchShow(to, lspc)
 {
  var c=''+to+" "+NUMPAD;		// not to redraw too much
  if(TouchesNow!=c) {
@@ -139,7 +152,7 @@ function TouchClick(e)
 {
 e.stopPropagation(); e.preventDefault();
 var t = e.target; if(!t) t=e.currentTarget;
-var c = parseInt(t.id.substr(5));
+var c = (t.id=="UKNC_canvas" ? 75 : parseInt(t.id.substr(5)));
 c = touch_subst_get(c);
 touchpushKey(c);
 } 
@@ -148,7 +161,7 @@ function TouchUp(e)
 {
 e.stopPropagation(); e.preventDefault();
 var t = e.target; if(!t) t=e.currentTarget;
-var c = parseInt(t.id.substr(5));
+var c = (t.id=="UKNC_canvas" ? 75 : parseInt(t.id.substr(5)))
 c = touch_subst_get(c);
 touchpopKey(c);
 } 
