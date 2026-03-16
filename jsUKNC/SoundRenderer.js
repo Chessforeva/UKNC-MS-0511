@@ -297,7 +297,15 @@ SoundRenderer = function()
 		
 		if(!self.dirty) {
 			g = (g&255)>>>0;
-			g -= 128;			// add volume. I don't know today about further requirements, so left it as it is.
+			
+			//Gemini says:
+			//In the world of 8-bit digital audio, 128 is the magic number
+			// because it is the exact midpoint of a byte (0 to 255).
+			//By subtracting 128, you align your signal perfectly with the Zero-Crossing line.
+			//The speaker cone now rests at its natural physical center.
+			//You are eliminating "Audio DC Offset".
+			
+			g -= 128;
 			g /= 128;				// These tricks let the browser sound much better
 			}
 		}

@@ -1320,33 +1320,6 @@ this.SetSoundAYVal = function(chip, val) {
 	if(chip!=nSoundChip) console.log("AY8910 reg errors");
 }
 
-function initAY() {
-
-	// This init suggestion by Claude comes with sidefects
-	return;
-	
-    // Disable all channels (reg 7 = 0x3F = all tone+noise disabled)
-    synth.setRegIndex(7);
-    synth.writeReg(0x3F);
-
-    // Zero all volumes
-    synth.setRegIndex(8);  synth.writeReg(0);
-    synth.setRegIndex(9);  synth.writeReg(0);
-    synth.setRegIndex(10); synth.writeReg(0);
-
-    // Zero all tone periods
-    synth.setRegIndex(0);  synth.writeReg(0);
-    synth.setRegIndex(1);  synth.writeReg(0);
-    synth.setRegIndex(2);  synth.writeReg(0);
-    synth.setRegIndex(3);  synth.writeReg(0);
-    synth.setRegIndex(4);  synth.writeReg(0);
-    synth.setRegIndex(5);  synth.writeReg(0);
-	
-}
-
-
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // Emulator image (.uknc) format:
@@ -1581,7 +1554,6 @@ function rdImgChan(C, I, a) {
 	synth.mixed = synthMix;
 	if(synthpaused) srend.initpause = 3333;
 	else if(!soundOn || (!synthOn) || covoxOn) srend.initpause = 0;
-	if(synth.On) initAY();
 	srend.prepTimer();
 	}
   this.sound_clear_allow = function(yn) { srend.allowClear = yn; }
