@@ -9,8 +9,11 @@ TOUCH_CTRL = {
         keyCount  : {},		//live key->number-of-active-touches map
 		infowas   : 0,
 		infoactivated : 0,
+		duration_loops: 0,
 		disabled  : []		// list of disabled keys (from Cheats.js) 
     };
+
+
 
 // -----
 //  ZONE BUILDER
@@ -220,7 +223,10 @@ function addTouchListeners(canvas) {
             for (var i = 0; i < tl.length; i++) { releaseZone(tl[i].identifier); }
         }, false);
 		
-		showControls(canvas);	// display the touch areas
+		if(TOUCH_CTRL.duration_loops) {
+			showControls(canvas);	// display the touch areas
+		}
+
     };
 
 // -----
@@ -322,7 +328,8 @@ function showControls(canvas) {
         ctx.restore();
 		
 		TOUCH_CTRL.infowas = 1;
-		TOUCH_CTRL.infoactivated=200;
+		TOUCH_CTRL.infoactivated = TOUCH_CTRL.duration_loops;
+
 };
 
 // -----
@@ -365,4 +372,4 @@ onRelease = function(key) {
 		c = touch_subst_get(c);
 		touchpopKey(c);
 	}
-};
+}; 

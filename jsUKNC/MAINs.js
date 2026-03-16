@@ -44,6 +44,7 @@ function FPSloop( onetime )
 /* File to process */
 Gbin.onGot=function(filename, bytes)
 	{
+	GAME.f2 = filename;
 	cheats.FileName = filename;			// save file name
 	var f = filename.toLowerCase();
 	if(f.indexOf(".rom")>0) {

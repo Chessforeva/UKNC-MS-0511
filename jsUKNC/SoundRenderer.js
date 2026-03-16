@@ -297,7 +297,7 @@ SoundRenderer = function()
 		
 		if(!self.dirty) {
 			g = (g&255)>>>0;
-			g -= 120;			// add volume. I don't know today about further requirements, so left it as it is.
+			g -= 128;			// add volume. I don't know today about further requirements, so left it as it is.
 			g /= 128;				// These tricks let the browser sound much better
 			}
 		}

@@ -27,11 +27,8 @@ Cheats = function(){
  var lv_dmp = {c:0,a:[]};
  var lv_cht = [];
  
- var FLAGS = 0;
- 
  this.reset = function() {
  
-	FLAGS = 0;
 	self.FileName = "";
  }
  
@@ -75,9 +72,19 @@ Cheats = function(){
  }
  
  function subst_RightShift_Space() {
-	if((FLAGS&1)==0) {
-		keyboard.Subst_Key(32, 69); touch_Subst_Key(75, 69);
-		FLAGS|=1;
+	if(!(GAME.flags&512)) {
+			// On Space click act like RightShift
+		keyboard.Subst_Key(32/*Space in HTML code*/, 69/*Right Shift on UKNC*/);
+			// On TouchButton of code to click act like RightShift
+		touch_Subst_Key(75/*Space in UKNC*/, 69/*Right Shift on UKNC*/);
+		GAME.flags|=512;
+	}
+ }
+ 
+ function subst_Esc_Space() {
+	if(!(GAME.flags&1024)) {
+		touch_Subst_Key(4/*Esc in UKNC*/,75/*Space on UKNC*/);
+		GAME.flags|=1024;
 	}
  }
  
@@ -94,51 +101,107 @@ Cheats = function(){
 
  this.hack = function() {
  
- var f = self.FileName;
- 
+ var fn = self.FileName;
+ var f2 = GAME.f2;
+ var f=((fn && fn.length>0) ? fn : (f2 ? f2 : '' ));
+
+ switch(f) {
+	
  /* Knight.uknc */
- if( f=="knight.uknc" || RAM[0][65535]==200 ) {
-	RAM[0][65535]=200;	// we know this file
+ case "knight.uknc":
 	subst_RightShift_Space();	// if Knight then substitute keys
+	subst_Esc_Space();			// disable Stop on Esc
 	RAM[1][10089] = 8;	// hack lives
 	var d = TOUCH_CTRL.disabled;
 	//if(!d.length) d.push('key_f1');	// disable F1 sleep on touch
-	}
-
- /* river.uknc */	
- if( f=="river.uknc" || RAM[0][65535]==220 ) {
-	RAM[0][65535]=220;	// we know this file
+	break;
+	
+ case "lode.SAV":
+	subst_Esc_Space();
+	break;
+	
+ case "welltris.uknc":
+	subst_RightShift_Space();
+	break;
+	
+ case "river.uknc":
 	subst_RightShift_Space();	// if River then substitute keys
-	}
-	
-if( f=="arkanoid.uknc" || RAM[0][65535]==201 ) {
-	RAM[0][65535]=201;
-	subst_RightShift_Space();
-	RAM[2][9062] = 112;	// hack lives (not sure)
-	}
+	break;
 
-if( f=="puckman.uknc" || RAM[0][65535]==202 ) {
-	RAM[0][65535]=202;
-	RAM[1][7771] = 7;	// hack lives (not sure)
-	}
+ case "hwyenc68.dsk":
+	subst_Esc_Space();
+	break;
+
+ case "EXPRES.SAV":
+ 	subst_Esc_Space();
+	break;
 	
-if( f=="gxonix.uknc" || RAM[0][65535]==203 ) {
-	RAM[0][65535]=203;
-	RAM[1][12801] = 9;	// hack lives
-	}
+ case "mklad.uknc":
+	RAM[1][2952] = 5;	// hack lives
+	break;
 	
-if( f=="lasthero.uknc" || RAM[0][65535]==204 ) {
-	RAM[0][65535]=204;
+ case "arkanoid.uknc":
 	subst_RightShift_Space();
-	}	
+	subst_Esc_Space();
+	RAM[2][9062] = 112;	// hack lives (not sure)
+	break;
+ 
+ case "sokoban.uknc":
+ 	subst_Esc_Space();
+	break;
+
+ case "columns.uknc":
+ 	subst_Esc_Space();
+	break;
+	
+ case "goblin.uknc":
+ 	subst_Esc_Space();
+	break;
+	
+ case "puckman.uknc":
+	RAM[1][7771] = 7;	// hack lives (not sure)
+	break;
+	
+ case "gxonix.uknc":
+	RAM[1][12801] = 9;	// hack lives
+	break;
+	
+ case "lasthero.uknc":
+	subst_RightShift_Space();
+	break;
   
-if( f=="boa.uknc" || RAM[0][65535]==205 ) {
-	RAM[0][65535]=205;
-	keyboard.Subst_Key(37/*Left*/, 88/*Numpad 4*/); touch_Subst_Key(78/*default left arrow*/, 88);
-	keyboard.Subst_Key(39/*Right*/, 120/*Numpad 6*/); touch_Subst_Key(91/*righ arrow*/, 120);
-	keyboard.Subst_Key(38/*Up*/, 101/*Numpad 8*/); touch_Subst_Key(108/*default up arrow*/,101);
-	keyboard.Subst_Key(40/*Down*/, 104/*Numpad 5*/); touch_Subst_Key(92/*default down arrow*/, 104);
+ case "boa.uknc":
+ 	subst_Esc_Space();
+	if(!(GAME.flags&2)) {
+		keyboard.Subst_Key(37/*Left*/, 88/*Numpad 4*/); touch_Subst_Key(78/*default left arrow*/, 88);
+		keyboard.Subst_Key(39/*Right*/, 120/*Numpad 6*/); touch_Subst_Key(91/*righ arrow*/, 120);
+		keyboard.Subst_Key(38/*Up*/, 101/*Numpad 8*/); touch_Subst_Key(108/*default up arrow*/,101);
+		keyboard.Subst_Key(40/*Down*/, 104/*Numpad 5*/); touch_Subst_Key(92/*default down arrow*/, 104);
+		GAME.flags|=2;
 	}
+	break;
+	
+ case "MINER.SAV":
+	subst_Esc_Space();
+	if(!(GAME.flags&2)) {
+		// Make touch startgame...
+		touch_Subst_Key(26/*3 in UKNC*/, 69/*Right Shift on UKNC*/);
+		GAME.flags|=2;
+	}
+	break;
+
+ case "mine.uknc":
+	subst_Esc_Space();
+	break;
+	
+ case "land.uknc_":
+	subst_Esc_Space();
+	break;
+ case "kotribalov.uknc":
+	subst_Esc_Space();
+	break;
+	
+ }
 
  livescheat();	// lives cheating tool
 
@@ -156,8 +219,8 @@ if( f=="boa.uknc" || RAM[0][65535]==205 ) {
  return this;
 }
 
-
-//To hook heypresses
+//
+// To hook touch presses on canvas
 function cheats_onPress(key) {
 	
 }
@@ -167,3 +230,16 @@ function cheats_onRelease(key) {
 	
 }
 
+// This can substitute keyboard(!) keys
+function cheats_pushKey( Key ) {
+	
+	if(GAME.flags&1024) {
+		if( Key.keycode==4 ) Key.keycode = 75;		// Substitute Esc to Space
+	}
+	
+	if(GAME.f2 && GAME.f2.length && GAME.f2=="MINER.SAV") {
+		if( Key.keycode==69 ) Key.keycode = 26;
+	}
+			
+	//LOG(Key.keycode + ' ' + Key.pressed);
+}

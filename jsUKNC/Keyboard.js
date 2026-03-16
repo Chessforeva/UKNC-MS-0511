@@ -431,6 +431,8 @@ this.processNextKey = function() {
 	if(keysbuffer.length) {			// process next keys - press it
 		var K = keysbuffer.shift();
 		
+			cheats_pushKey(K);
+		
 			var i = keyspressed.lastIndexOf(K.keycode);
 			if((i<0) || ( K.pressed != keyspressed[i].pressed )) {
 					Board.KeyboardEvent(K.keycode,K.pressed);

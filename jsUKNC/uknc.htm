@@ -15,14 +15,15 @@ outline: 0;
 .Ckbx { width: 20px; height: 20px; }
 .dbg0 { font-family: Courier; font-size:14px }
 </style>
-<div id="bg" class="disSel" style="width:980px;height:820px;position:absolute;top:0px;left:0px;" onmousedown="if(preventaction) preventaction(event)"></div>
+<div id="bg" class="disSel" style="width:980px;height:820px;position:absolute;top:0px;left:0px;" 
+  onmousedown="if(preventaction) preventaction(event)"></div>
 
 <!--
 UKNC Elektronika MS-0511 emulator HTML5 javascript
 v.2.0 
 04.2021 - v.1.a
 02.2026 - fullscreen exit to the main window
-03.2026 - v.2 sounds addition
+03.2026 - sounds addition
 )
 
 Not any right reserved:)
@@ -221,11 +222,12 @@ var WindoW = winWiHi();
   <option value="welltris.zip">Welltris</option>
   <option value="hwyenc.zip">Highway Encounter</option>
   <option value="desolate.zip">Desolate</option>
-  <option value="lasthero.zip">Last Hero</option>
+  <option value="miner2.zip">Miner</option>
+  <option value="puckman.zip">Puckman</option>
   <option value="express.zip">Express</option>
   <option value="columns2.zip">Columns2</option>
   <option value="river.zip">River shooter</option>
-  <option value="gm40">40 games</option>
+  <option value="saper.zip">Saper mines</option>
   <option value="king.zip">Korolevstvo</option>
   <option value="zvzdpatrol.zip">Zvezdn.Patrul.</option>
   <option value="gxonix.zip">GXonix</option>
@@ -233,16 +235,15 @@ var WindoW = winWiHi();
   <option value="arkanoid.zip">Arkanoid</option>
   <option value="boulder.zip">Boulder Dash</option>
   <option value="sokoban.zip">Sokoban</option>
-  <option value="puckman.zip">Puckman</option>
+  <option value="lasthero.zip">Last Hero</option>
   <option value="cline.zip">ColorLines</option>
   <option value="columns.zip">Columns</option>
-  <option value="saper.zip">Saper mines</option>
   <option value="goblin.zip">Zamok Goblin.</option>
   <option value="boa.zip">Boa snake</option>
-  <option value="miner2.zip">Miner</option>
   <option value="mine.zip">Mine sweeper</option>
   <option value="land.zip">Land</option>
   <option value="kotribalov.zip">Kot Ribolov</option>
+  <option value="gm40">40 games</option>
   <option value="GMbst">MZ0: - MZ3: RUN</option>
   <option value="GML1">DIR /BRI MZ1:</option>
   <option value="ITO90.zip">ITO 90 disk</option>
@@ -328,6 +329,9 @@ return false;
 // The main UKNC global 
 //-----------------------
 //
+
+var GAME = { f:null, f2:null, adv:'', name:null, flags:0 };		// Some good cases deserve more attention
+
 var cheats = new Cheats();
 
 var keyboard = new Keyboard();
@@ -393,6 +397,7 @@ function loaded() {
 	
 	z.style.zIndex = -8000;
 	
+	TOUCH_CTRL.duration_loops = 200;
 	if(MOBILE_) addTouchListeners(O);
 	else addSpaceListenerOnly(O);
   }
@@ -790,26 +795,41 @@ function _setRetValues() {
 function userGames(file) {
 
 	var f = file || GE("usergames").value;
-	
+	GAME.f = f;
+
 	sound_sv = "bpr";
 	
 	Board.Reset();
 	FloppyCtl.detach();
 	
 	switch(f) {
-	case "gm40": goDsks(["gm40a.zip","gm40b.zip"]); return;
-	case "krakout": goDsks(["krakout.zip","krakout2.zip"]); sound_sv = "8910c3"; return;	
+	case "gm40":
+		goDsks(["gm40a.zip","gm40b.zip"]);
+		return;
+	case "krakout":
+		goDsks(["krakout.zip","krakout2.zip"]); sound_sv = "8910c3";
+		return;	
 	case "king.zip":
 	case "zvzdpatrol.zip":
 	case "kotribalov.zip":
 	case "land.zip":
-		NUMPAD = 1; break;
-	case "hwyenc.zip": goDsks(["hwyenc.zip","hwyenca.zip"]); return;
-	case "desolate.zip":	
+		NUMPAD = 1;
+		break;
+	case "hwyenc.zip":
+		goDsks(["hwyenc.zip","hwyenca.zip"]);
+		NUMPAD = 1;
+		return;
+	case "desolate.zip":
+		Touch_Buttons = false;
 	case "ITO90.zip":
-		Board.LoadFromImage( UkncZagruzka,1 ); break;
-	case "GMbst": goDsks(["GMbstA.zip","GMbstB.zip","GMbstC.zip"]); return;
-	case "GML1": goDsks(["gmL1a.zip","gmL1b.zip","gmL1c.zip"]); return;
+		Board.LoadFromImage( UkncZagruzka,1 );
+		break;
+	case "GMbst":
+		goDsks(["GMbstA.zip","GMbstB.zip","GMbstC.zip"]);
+		return;
+	case "GML1":
+		goDsks(["gmL1a.zip","gmL1b.zip","gmL1c.zip"]);
+		return;
 	}
 	
 	if(f.length) Gbin.getUrl("files/"+f);	// read from url, see MAINs.js
