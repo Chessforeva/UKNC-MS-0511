@@ -296,7 +296,6 @@ SoundRenderer = function()
 		g = val;
 		
 		if(!self.dirty) {
-			g = (g&255)>>>0;
 			
 			//Gemini says:
 			//In the world of 8-bit digital audio, 128 is the magic number
