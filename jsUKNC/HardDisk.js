@@ -139,7 +139,7 @@ function /*void*/ InvertBuffer(A) {
         break;
     }
 
-	speed.dsk = true;
+	speed.hds = true;
     return data;
 }
 
@@ -192,7 +192,7 @@ function /*void*/ InvertBuffer(A) {
         HandleCommand(/*uint8_t*/ (data&255));
         break;
     }
-	speed.dsk = true;
+	speed.hds = true;
 }
 
 // Called from CMotherboard::SystemFrame() every tick
@@ -291,7 +291,7 @@ function /*void*/ IdentifyDrive()
 
 /*uint32_t*/function CalculateOffset()
 {
-	speed.dsk = true;
+	speed.hds = true;
     var /*int*/ sector = (((curcylinder * numheads) + curhead) * numsectors) + (cursector - 1);
     return (sector * IDE.DISK_SECTOR_SIZE);
 }

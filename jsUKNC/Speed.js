@@ -52,6 +52,8 @@ Optimize=0
 	// various accessible flags and counters to differ and optimize where possible
 
 	this.dsk = false;		// disk drive is active	(1 - then should count ticks), same for HDD
+	this.hds = false;		// hdd is active, just like floppies, but does not(!) change Optimize mode
+	
 	var idle = 0;			// counts timing while nothing happens with disk drive
 	
 	this.OZ = 0;			// 1-calculate counters
@@ -84,7 +86,7 @@ Optimize=0
 
 	// from Floppy Periodic
   this.disks_adjust = function() {
-		if(self.dsk) {
+		if(self.dsk) {	// activity indicator
 			idle = 8000;
 			if(self.Optimize==1) {
 				self.setOptimize(2);
@@ -98,6 +100,14 @@ Optimize=0
 					}
 				}
 			}
+	}
+	
+	// from Floppy Periodic
+  this.hdds_adjust = function() {
+	
+	// HDDs can operate in optimized mode
+	// Do nothing...
+	// if(self.hds) { self.hds=0; }	// activity indicator
 	}
 	
 	this.setOptimize = function(n) {

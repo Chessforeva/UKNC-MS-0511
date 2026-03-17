@@ -123,7 +123,7 @@ var WindoW = winWiHi();
   <option value="aDSK0">Add empty disk</option>
   <option value="*1">--------------------</option>
   <option value="FScr">FullScreen (Alt+Enter)</option>
-  <option value="RST">Reset restart (F12)</option>  
+  <option value="RST1">Reset restart (F12)</option>  
   <option value="RLD">Reload clear all</option>
   <option value="DBG">Debug (F9)</option>
   <option value="*2">--------------------</option>
@@ -150,7 +150,6 @@ var WindoW = winWiHi();
   <option value="*4">___parts to set HDDs ___</option>
   <option value="AddIDE">Add IDE rom, drop HDD img</option>
   <option value="AddWDX">Add WDX HDD rom to a slot</option>
-  <option value="AddDU">Add DU? HDD rom</option>
   <option value="IDEMNG">Add IDE disk,run IDDRIV</option> 
   <option value="ADOS">Add ADOS disk,run WDR</option>
   <option value="SYSWDX">Add syswdx disk</option>
@@ -522,7 +521,9 @@ function userBoot() {
  case "UKZ": Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
  case "aDSK0": LOADDSK = ["EMPTY.zip"]; GoDisks(); O.value = "*1"; break;
  case "FScr": openFullscreen(); O.value = "*1"; break;
- case "RST","RST2": Board.Reset(); scr.DRAW(); break;
+ case "RST1":
+ case "RST2":
+  Board.Reset(); scr.DRAW(); O.value = "*1"; break;
  case "RLD": document.location.href = href.split('?')[0]; break;
  case "DBG": dbg.show(); O.value = "*2"; break;
  case "net11": goDsks(["net11rtA.zip","net11rtB.zip"]); break;
@@ -547,23 +548,26 @@ function userBoot() {
     break;
  case "HDD2": goDsks(["IDHDDMNG.zip","HDD2MB.zip","idmngr.zip"]); break;
  case "ADWD": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
- case "AddIDE": LOADDSK = ["idecart.zip"]; GoDisks(); O.value = "*4";break;
- case "AddWDX": LOADDSK = ["wdxcart.zip"]; GoDisks(); O.value = "*4";break;
- case "AddDU": LOADDSK = ["ideducart.zip"]; GoDisks(); O.value = "*4";break;
- case "IDEMNG": goDsks(["IDHDDMNG.zip"]); break;  
- case "ADOS": goDsks(["ADos0.zip"]); break;
- case "SYSWDX": goDsks(["syswdx.zip"]); break;
- case "CasBAS": LOADDSK = ["bascart.zip"]; GoDisks(); O.value = "*4";break;
+ case "AddIDE": loadDsks(["idecart.zip"]); O.value = "*4";break;
+ case "AddWDX": loadDsks(["wdxcart.zip"]); O.value = "*4";break;
+ case "IDEMNG": loadDsks(["IDHDDMNG.zip"]); O.value = "*4"; break;  
+ case "ADOS": loadDsks(["ADos0.zip"]); O.value = "*4"; break;
+ case "SYSWDX": loadDsks(["syswdx.zip"]); O.value = "*4"; break;
+ case "CasBAS": loadDsks(["bascart.zip"]); O.value = "*4"; break;
  case "Cheat": cheats.cheathelp(); O.value = "*5"; break;
  }
 }
 
 setInterval('userLoop3sec()',3000);	// once per 3seconds
 
-function goDsks(dsk_arr) {
-	Board.Reset();
+function loadDsks(dsk_arr) {
 	LOADDSK = dsk_arr;
 	GoDisks();
+}
+
+function goDsks(dsk_arr) {
+	Board.Reset();
+	loadDsks(dsk_arr);
 }
 
 _s4fs = {};	// Save for fullscreen values

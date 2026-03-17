@@ -30,7 +30,8 @@ function FPSloop( onetime )
 		}
 	
    speed.disks_adjust();					// disk cases for optimizer
-   
+   speed.hdds_adjust();						// HDDs, but it does nothing 
+	
    scr.fastDRAW();
    keyboard.processNextKey();		// process queued keys
    }
@@ -76,17 +77,13 @@ Gbin.onGot=function(filename, bytes)
 		if(n>0) {
 			var cn = Board.get_free_cart_N();		// also load Cartridge ROM for HDD (ID, not WD)
 			if(cn==n) {
-						if( f.toUpperCase().indexOf("WD")>=0 ) {
-							
-							// the file "ide_wdromv0110.bin"
-							Board.LoadROMCartridge(n,"ide_wd.bin",IdeWDbootCart);
-						}
-						else {
-							// the file "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
-							Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);
-						}
-						
-						
+						// "ide_wdromv0110.bin" it the old Winchester standard,
+						// but it does the same as IDE and does not boot correctly
+						// Activates with WDR.SAV, formats with WDX.SAV
+						//	Board.LoadROMCartridge(n,"ide_wd.bin",IdeWDbootCart);
+
+						// "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
+						Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);
 				}
 			HardDrives[n-1].AttachImage(filename, bytes);
 			HDs = true;
