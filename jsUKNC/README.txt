@@ -34,7 +34,7 @@ https://chessforeva.bitbucket.io/UKNC/uknc.htm
 Notes:
 
 The emulator skips interrupts, ignores much of proper timings, differs from the real hardware.
-It is javascript running at full speed. Anyway, looks fine.
+It is javascript running full speed. Anyway, looks fine.
 
 Intended for ESP sounds, FPGAs tomorrow and UKNC murmulators with a GB RAM (it's a joke :)
 
