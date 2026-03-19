@@ -49,7 +49,7 @@ https://hobot.pdp-11.ru/ukdwk_archive/
 
 
 2. An 170Mb .img Hard disk image file of software available for downloading at site.
-Download 47Mb rar-file, extract, drop WDC170inv_P.img file onto the emulator and restart F12.
+Download 47Mb rar-file and drop onto the emulator, restart F12.
 Set 2 - boot from cartridge, it is slot 1
 Then enter 0 as slot number (0-5)
 That's it.

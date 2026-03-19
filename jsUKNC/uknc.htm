@@ -97,7 +97,6 @@ var WindoW = winWiHi();
 	width:750px;height:566px;
         border: 2px dashed #333333; border-radius: 5px;
         text-align: center; font: 12pt bold; color: black;">
-
 <div id="filesloaded" style="display:inline">
 <font color="white">Drop a .uknc .dsk(floppy) .sav(.gam,.gme) .rom, .ram(cart.), .img(IDE) file here, or zipped one</font>
 <div id="download_zone" style="color:blue;display:inline;visibility:hidden">
@@ -169,6 +168,9 @@ var WindoW = winWiHi();
 <tr><td>
 <font size="2"><div id="MHZshow">Starting...</div></font>
 </td></tr>
+<tr>
+<td><font size="2"><div id="UKNCshow"></div></font></td>	
+</tr>
 </table>
 
 <input type="button" id="kbrd" value="Show keyboard" onclick="kbShow()">
@@ -732,7 +734,6 @@ if(Q!=null) {
 	
 	touchShow(Touch_Buttons);
 	}
-
 	
 Q = GE("numpadon");
 if(Q!=null) {
@@ -836,12 +837,23 @@ function userGames(file) {
 		return;
 	}
 	
+	_GBIN.i = null;
 	if(f.length) Gbin.getUrl("files/"+f);	// read from url, see MAINs.js
 	
 }
 
+Gbin.progress = function( step, N ) {	// Extractor info on progress
+	var O = GE("UKNCshow");
+	var s = '';
+	for(var i=1;i<=10;i++) {
+		if(N) s+=((step<((i*N)/10)) ? "_" : "#");
+		else s+=((i-1)<=(step%10) ? "_" : "=");
+	}
+	O.innerHTML = s;
+}
 
 function GoDisks() {
+	_GBIN.i = null;
 	Gbin.getUrl("files/"+LOADDSK[0]);
 }
 
@@ -941,8 +953,6 @@ function closeFullscreen() {
   else if (D.msExitFullscreen) /* IE11 */
     D.msExitFullscreen();
 }
-
-
 
 /* Menus for some cases, no need to write "RUN MZ1:GAME.SAV[enter]" */
 var GameSelected = 0;	// selected game, or dsk:name
