@@ -16,7 +16,7 @@ HDD IDE .img images, or simply let the sample grow, and save later.
 
 
 Sounds additions from 03.2026.
-Samples and updates too.
+Samples and newest games updates too.
 Hard disks boths slots - verified ok.
 
 
@@ -49,11 +49,12 @@ https://hobot.pdp-11.ru/ukdwk_archive/
 
 
 2. An 170Mb .img Hard disk image file of software available for downloading at site.
-Download 47Mb rar-file and drop onto the emulator, restart F12.
+Download 47Mb rar-file and drop it onto the emulator, restart F12.
 Set 2 - boot from cartridge, it is slot 1
 Then enter 0 as slot number (0-5)
 That's it.
 Works locally in browser and fast.
+Nothing is uploaded to the server on a file-drop onto the emulator.
 
 https://hobot.pdp-11.ru/EMULATORS/UKNCBTL_HDD/uknc_hdd_id/
 
@@ -61,5 +62,6 @@ https://hobot.pdp-11.ru/EMULATORS/UKNCBTL_HDD/uknc_hdd_id/
 3. Other:
 
 https://hobot.pdp-11.ru/ukdwk_archive/ukncbtlwebcomplekt/best_GAMES_UKNC/bestgamesUKNC.dsk
+
 https://hobot.pdp-11.ru/ukdwk_archive/ukncbtlwebcomplekt/ASPcorpGAMES_UKNC/ASPcorpGAMES_UKNC.dsk
 

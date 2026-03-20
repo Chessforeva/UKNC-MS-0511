@@ -99,41 +99,48 @@ Cheats = function(){
 	return b.join('\n');
  }
 
+ function signIt(code) {
+	RAM[0][65535] = code;
+ }
+
  this.hack = function() {
  
  var fn = self.FileName;
  var f2 = GAME.f2;
  var f=((fn && fn.length>0) ? fn : (f2 ? f2 : '' ));
 
- var signature = RAM[0][65535];
- switch(signature) {
- case 200: f = "knight.uknc"; break;
- case 220: f = "river.uknc"; break;
- case 201: f = "arkanoid.uknc"; break;
- case 204: f = "lasthero.uknc"; break;
- case 205: f = "boa.uknc"; break;
- case 202: f = "MINER.SAV"; break;
- case 230: f = "mine.uknc"; break;
- case 231: f = "land.uknc_"; break;
- case 232: f = "kotribalov.uknc"; break;
- case 233: f = "lode.SAV"; break;
- case 234: f = "welltris.uknc"; break;
- case 235: f = "hwyenc68.dsk"; break;
- case 236: f = "EXPRES.SAV"; break;
- case 237: f = "mklad.uknc"; break;
- case 238: f = "sokoban.uknc"; break;
- case 239: f = "columns.uknc"; break;
- case 240: f = "goblin.uknc"; break;
- case 241: f = "puckman.uknc"; break;
- case 242: f = "gxonix.uknc"; break;
+ var Sign = RAM[0][65535], pS = Sign;
+ var SIGNS = [
+ {c:200, f:"knight.uknc" },
+ {c:220, f:"river.uknc" },
+ {c:201, f:"arkanoid.uknc" },
+ {c:204, f:"lasthero.uknc" },
+ {c:205, f:"boa.uknc" },
+ {c:202, f:"MINER.SAV" },
+ {c:230, f:"mine.uknc" },
+ {c:231, f:"land.uknc_" },
+ {c:232, f:"kotribalov.uknc" },
+ {c:233, f:"lode.SAV" },
+ {c:234, f:"welltris.uknc" },
+ {c:235, f:"hwyenc68.dsk" },
+ {c:236, f:"EXPRES.SAV" },
+ {c:237, f:"mklad.uknc" },
+ {c:238, f:"sokoban.uknc" },
+ {c:239, f:"columns.uknc" },
+ {c:240, f:"goblin.uknc" },
+ {c:241, f:"puckman.uknc" },
+ {c:242, f:"gxonix.uknc" },
+ ];
+ for(var i in SIGNS) {
+	var b=SIGNS[i];
+	if(b.c==Sign) f=b.f;
  }
-	
-
+ 
  switch(f) {
 	
  /* Knight.uknc */
  case "knight.uknc":
-	RAM[0][65535]=200;
+	signIt(200);
 	subst_RightShift_Space();	// if Knight then substitute keys
 	subst_Esc_Space();			// disable Stop on Esc
 	RAM[1][10089] = 8;	// hack lives
@@ -142,74 +149,74 @@ Cheats = function(){
 	break;
 	
  case "lode.SAV":
-	RAM[0][65535]=233;
+	signIt(233);
 	subst_Esc_Space();
 	break;
 	
  case "welltris.uknc":
-	RAM[0][65535]=234;
+	signIt(234);
 	subst_RightShift_Space();
 	break;
 	
  case "river.uknc":
-	RAM[0][65535]=220;
+	signIt(220);
 	subst_RightShift_Space();	// if River then substitute keys
 	break;
 
  case "hwyenc68.dsk":
-	RAM[0][65535]=235;
+	signIt(235);
 	subst_Esc_Space();
 	break;
 
  case "EXPRES.SAV":
-	RAM[0][65535]=236;
+	signIt(236);
  	subst_Esc_Space();
 	break;
 	
  case "mklad.uknc":
-	RAM[0][65535]=237;
+	signIt(237);
 	RAM[1][2952] = 5;	// hack lives
 	break;
 	
  case "arkanoid.uknc":
-	RAM[0][65535]=201; 
+	signIt(201); 
 	subst_RightShift_Space();
 	subst_Esc_Space();
 	RAM[2][9062] = 112;	// hack lives (not sure)
 	break;
  
  case "sokoban.uknc":
-	RAM[0][65535]=238;
+	signIt(238);
  	subst_Esc_Space();
 	break;
 
  case "columns.uknc":
-	RAM[0][65535]=239;
+	signIt(239);
  	subst_Esc_Space();
 	break;
 	
  case "goblin.uknc":
-	RAM[0][65535]=240;
+	signIt(240);
  	subst_Esc_Space();
 	break;
 	
  case "puckman.uknc":
-	RAM[0][65535]=241;
+	signIt(241);
 	RAM[1][7771] = 7;	// hack lives (not sure)
 	break;
 	
  case "gxonix.uknc":
-	RAM[0][65535]=242;
+	signIt(242);
 	RAM[1][12801] = 9;	// hack lives
 	break;
 	
  case "lasthero.uknc":
- 	RAM[0][65535]=204;
+ 	signIt(204);
 	subst_RightShift_Space();
 	break;
   
  case "boa.uknc":
-	RAM[0][65535]=205;
+	signIt(205);
  	subst_Esc_Space();
 	if(!(GAME.flags&2)) {
 		keyboard.Subst_Key(37/*Left*/, 88/*Numpad 4*/); touch_Subst_Key(78/*default left arrow*/, 88);
@@ -221,7 +228,7 @@ Cheats = function(){
 	break;
 	
  case "MINER.SAV":
-	RAM[0][65535]=202;
+	signIt(202);
 	subst_Esc_Space();
 	if(!(GAME.flags&2)) {
 		// Make touch startgame...
@@ -231,16 +238,16 @@ Cheats = function(){
 	break;
 
  case "mine.uknc":
-	RAM[0][65535]=230;
+	signIt(230);
 	subst_Esc_Space();
 	break;
 	
  case "land.uknc_":
-	RAM[0][65535]=231;
+	signIt(231);
 	subst_Esc_Space();
 	break;
  case "kotribalov.uknc":
-	RAM[0][65535]=232;
+	signIt(232);
 	subst_Esc_Space();
 	break;
 	
