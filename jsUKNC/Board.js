@@ -345,6 +345,7 @@ function /*void*/ TimerTick() // Timer Tick, 2uS -- dividers are within timer ro
     Timer.reload = val & 4095; /*07777*/
     if ((Timer.flags & 1) == 0)
         Timer.Tick = Timer.reload;
+	Timer_reload_less_10 = ((Timer.reload < 10) ? Timer.reload : null);
 }
 
 /*void*/ this.SetTimerState = function(/*uint16_t*/ val) // Sets timer state

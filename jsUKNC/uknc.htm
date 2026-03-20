@@ -305,7 +305,9 @@ var WindoW = winWiHi();
   </script>
  </div>
  
- </td></tr></table> 
+ </td></tr></table>
+ 
+ <div id="SHOW2" style="padding-left:20px"></div>
 
 </div>
 
@@ -369,7 +371,7 @@ var soundOn=0;		// Sound Off
 var sound_sv = "none";	// Save last value
 var sound_last = "1t";
 
-
+Timer_reload_less_10 = null;		// To indicate too frequent interrupts
 
 function loaded() {
  var D=GE("dropfile"), O=GE("UKNC_canvas"), o=GE("debug_div"), v=GE("kbimage"), y=GE("options");
@@ -689,6 +691,15 @@ if(dbg.active) {
 	if(n!=Q.value) Q.value=n;
  }
  
+ Q = GE("UKNCshow");
+ if(Q!=null) {
+   var s='';
+   if(Timer_reload_less_10!=null) 
+		s+=' <div style="color:brown"><i>(timer.start=' +
+		Timer_reload_less_10 + '?)</i></div>';
+   Q.innerHTML = s;
+   }
+
  Q = GE("filesloaded");
  if(Q!=null) {
 	s="";

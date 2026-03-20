@@ -40,11 +40,9 @@ Turbomode enabler:)
 Just like in BK-0010 case, the timer.start too low makes often interrupts,
 stealing time for the emulator to redraw screens, catch keyboard, read disks, etc.
 Gemini made a crash sample:
-MOV  #1, @#177710     ; Set 'start' to 1 (extremely fast)
-MOV  #105, @#177706   ; Start, 1:16 divisor, Reload, Interrupt Enable
-; RESULT: Interrupts fire every 32 cycles. 
-; The VM2 CPU needs ~70 cycles just to enter/exit.
-; THE COMPUTER IS NOW A BRICK.
+MOV #1,   @#177712    ; Set 'start' to 1 (extremely fast)
+MOV #1,   @#177714    ; Set Current to 1 (Trigger immediately)
+MOV #203, @#177710    ; Start, 1:16 Divisor, Auto-Reload, Interrupt Enable
 
 
 
