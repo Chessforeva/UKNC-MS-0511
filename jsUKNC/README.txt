@@ -3,9 +3,7 @@ UKNC javascript emulator HTML5
 
 Some games and demos.
 
-
 Note: put the "keybimgs" folder in the root, or modify path in Touches.js
-
 
 
 Derived from UKNCBTL. There is no other good source.
@@ -38,6 +36,15 @@ It is javascript running full speed. Anyway, looks fine.
 
 Intended for ESP sounds, FPGAs tomorrow and UKNC murmulators with a GB RAM (it's a joke :)
 
+Turbomode enabler:)
+Just like in BK-0010 case, the timer.start too low makes often interrupts,
+stealing time for the emulator to redraw screens, catch keyboard, read disks, etc.
+Gemini made a crash sample:
+MOV  #1, @#177710     ; Set 'start' to 1 (extremely fast)
+MOV  #105, @#177706   ; Start, 1:16 divisor, Reload, Interrupt Enable
+; RESULT: Interrupts fire every 32 cycles. 
+; The VM2 CPU needs ~70 cycles just to enter/exit.
+; THE COMPUTER IS NOW A BRICK.
 
 
 
