@@ -624,6 +624,12 @@ if(FullScreen) {
  if( isFullscreen() && FullScreen==2 ) FullScreen=3;	// We are in FullScreen mode
  
  if( FullScreen==3 && !isFullscreen() ) {	// Exited Fullscreen mode
+ 
+ 	if(MOBILE_) {
+	FullScreen = 0;
+	}
+	else {
+
 	var B=GE("back_button"),T=B.style;
 	T.left='0px'; T.top='0px';
 	T.width='80px'; T.height='30px';
@@ -639,6 +645,7 @@ if(FullScreen) {
 	S.left="-2px"; S.top="-2px";
 	S.width=''+parseInt(WindoW.width+4)+"px";
 	S.height=''+parseInt(WindoW.height+4)+"px";
+	}
 }
  
 if( FullScreen==5 ) {	// Return the main window
@@ -933,18 +940,21 @@ function download_uknc() {
 
 function openFullscreen() {
 
-  if(MOBILE_) return;
-
-  var E = document.documentElement;
-  if(E) {
-  if (E.requestFullscreen) E.requestFullscreen();
-  else if (E.webkitRequestFullscreen) /* Safari */
-    E.webkitRequestFullscreen();
-  else if (E.msRequestFullscreen) /* IE11 */
-    E.msRequestFullscreen();
-  }
-  FullScreen=1;
+var E = (MOBILE_ ? GE("UKNC_canvas") : document.documentElement );
+if (E) {
+    if (E.requestFullscreen) {
+        E.requestFullscreen();
+    } else if (E.webkitRequestFullscreen) { /* Safari / Older Chrome */
+        E.webkitRequestFullscreen();
+    } else if (E.msRequestFullscreen) { /* IE11 */
+        E.msRequestFullscreen();
+    } else if (E.mozRequestFullScreen) { /* Firefox - Note the capital S */
+        E.mozRequestFullScreen();
+    }
+}  
+  FullScreen=( MOBILE_ ? 3 : 1);
 }
+
 
 function isFullscreen() {
   return !!(
@@ -956,14 +966,21 @@ function isFullscreen() {
 }
 
 
+	// not used
 function closeFullscreen() {
   var D = document;
-  if (D.exitFullscreen) D.exitFullscreen();
-  else if (D.webkitExitFullscreen) /* Safari */
+  if (D.exitFullscreen) {
+    D.exitFullscreen();
+  } else if (D.webkitExitFullscreen) { /* Safari */
     D.webkitExitFullscreen();
-  else if (D.msExitFullscreen) /* IE11 */
+  } else if (D.mozCancelFullScreen) { /* Firefox - Note "Cancel" and "Screen" */
+    D.mozCancelFullScreen();
+  } else if (D.msExitFullscreen) { /* IE11 */
     D.msExitFullscreen();
+  }
+  FullScreen=0;
 }
+
 
 /* Menus for some cases, no need to write "RUN MZ1:GAME.SAV[enter]" */
 var GameSelected = 0;	// selected game, or dsk:name
