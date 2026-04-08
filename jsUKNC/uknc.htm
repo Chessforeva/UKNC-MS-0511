@@ -98,8 +98,9 @@ var WindoW = winWiHi();
         border: 2px dashed #333333; border-radius: 5px;
         text-align: center; font: 12pt bold; color: black;">
 <div id="filesloaded" style="display:inline">
-<font color="white">Drop a .uknc .dsk(floppy) .sav(.gam,.gme) .rom, .ram(cart.), .img(IDE) file here, or zipped one, or </font>
-<span id="browseBtn" style="text-decoration: underline; cursor: pointer; background-color: #184079; color: white;">[browse]</span>.</div>
+<font color="white">Drop a .uknc .dsk(floppy) .sav(.gam,.gme) .rom, .ram(cart.), .img(IDE) file here, or zipped one, or 
+<span id="browseBtn" style="text-decoration: underline; cursor: pointer; background-color: #184079; color: white;">[browse]</span>.
+</font></div>
 <input type="file" id="fileInput" style="display: none;">
 
 <div id="download_zone" style="color:blue;display:inline;visibility:hidden">
@@ -759,9 +760,9 @@ if(Q!=null) {
 	if(!Touch_Buttons && r.innerHTML.indexOf("FullScreen")<0) {
 	var O=GE("UKNC_canvas"),q=GE("options"),m=GE("dropfile");
 	var w=O.style,z=m.style;
-	w.width="900px"; w.height="600px";
-	z.width="914px"; z.height="630px";
-	q.style.top = "640px";
+	w.width="990px"; w.height="722px";
+	z.width="1004px"; z.height="752px";
+	q.style.top = "762px";
 	R.style.visibility = "hidden";
 	r.innerHTML='<input type="checkbox" class="Ckbx" '+
 		'title="Turn on FullScreen mode" onclick="openFullscreen();">FullScreen<br>';
