@@ -61,6 +61,7 @@ Soviet school computer during 80s-90s.
 <script src="MemContr.js"></script>
 <script src="Floppy.js"></script>
 <script src="HardDisk.js"></script>
+<script src="HardDiskLBA.js"></script>
 <script src="Board.js"></script>
 <script src="Screen.js"></script>
 <script src="Keyboard.js"></script>
@@ -136,7 +137,7 @@ var WindoW = winWiHi();
   <option value="RC">RC commander</option>
   <option value="EDT">Text Editor</option>
   <option value="PLY">GraphEdit Polyss</option>
-  <option value="BdAp">Bad Apple movie demo</option>
+  <option value="BdAp">Bad Apple small demo</option>
   <option value="TimeCS">TimeCS AY MUSIC (-bugz)</option>
   <option value="Cvx1">Covox sample1</option>
   <option value="Cvx2">Covox sample2</option>
@@ -151,6 +152,8 @@ var WindoW = winWiHi();
   <option value="ADWD">ADOS, WDR for HDD</option>
   <option value=" "> </option>
   <option value="*4">___parts to set HDDs ___</option>
+  <option value="SetLBA28_0">Slot1 fast LBA28 (BadApple)</option>
+  <option value="SetLBA28_1">Slot2 fast LBA28 (BadApple)</option>
   <option value="AddIDE">Add IDE rom, drop HDD img</option>
   <option value="AddWDX">Add WDX HDD rom to a slot</option>
   <option value="IDEMNG">Add IDE disk,run IDDRIV</option> 
@@ -362,7 +365,8 @@ var Ppu = new K1801VM2("PPU");
 Cpu.MC = new MemoryController(0);		// CPU memory control 
 Ppu.MC = new MemoryController(1);		// PPU memory control
 
-var HardDrives = [];		// 2 HDD can be attached
+var HDD_LBA = [0,0];		// is LBA28 supported for the slot
+var HardDrives = [0,0];		// 2 HDD can be attached
 var HDs = false;			// global, is any HD attached?	
 
 var speed = new Speed();
@@ -554,7 +558,11 @@ function userBoot() {
  case "RC": goDsks([ "RC0.zip","RCa.zip"]); break;
  case "EDT": goDsks(["PAF0.zip","Editor0.zip","EditorA.zip"]); break;
  case "PLY": goDsks(["PAF0.zip","PolyssA.zip","PolyssB.zip"]); break;
- case "BdAp": 
+ case "BdAp":
+   GAME.adv = '<div style="font-size:18px">' +
+	'<b>bappwd.img</b> (54Mb) <a href="https://github.com/blairecas/badapple/tree/main" target="blank" >' +
+	'Git</a> is the full version with covox sound.' +
+	'</a></div>';
    soundOn=0;snd();snd_mode();GE("soundonoff").disabled = true;
    loadDsks(["BadApplea.zip"]); setTimeout('goDsks(["BadApple.zip"])',2000);
    break;
@@ -571,6 +579,8 @@ function userBoot() {
     break;
  case "HDD2": goDsks(["IDHDDMNG.zip","HDD2MB.zip","idmngr.zip"]); break;
  case "ADWD": goDsks(["ADos0.zip","wdxcart.zip", "HDD2MB.zip", "ADosA.zip"]); break;
+ case "SetLBA28_0": HDD_LBA[0] = 1; Board.HardDriveReInit(1); O.value = "*4";break;
+ case "SetLBA28_1": HDD_LBA[1] = 1; Board.HardDriveReInit(2); O.value = "*4";break;
  case "AddIDE": loadDsks(["idecart.zip"]); O.value = "*4";break;
  case "AddWDX": loadDsks(["wdxcart.zip"]); O.value = "*4";break;
  case "IDEMNG": loadDsks(["IDHDDMNG.zip"]); O.value = "*4"; break;  
@@ -819,6 +829,12 @@ Q = GE("soundonoff"); n=(soundOn==1);
 		O.value = sound_last;
 		sndlast();
 		O.disabled = true;
+		}
+	}
+ if(GAME.adv.length) {
+	Q = GE("SHOW2");
+	if(Q!=null && Q.innerHTML.length==0) {
+		Q.innerHTML = GAME.adv;
 		}
 	}
 

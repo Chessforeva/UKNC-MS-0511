@@ -121,17 +121,23 @@ function _gotFile(filename, bytes) {
 			}
 		}
 	if(f.indexOf(".img")>0) {
+		
 		var n = Board.get_free_hdd_drive_N();
 		if(n>0) {
+			if(f=="bappwd.img") { HDD_LBA[n-1]=1; Board.HardDriveReInit(n); }
+			
 			var cn = Board.get_free_cart_N();		// also load Cartridge ROM for HDD (ID, not WD)
 			if(cn==n) {
 						// "ide_wdromv0110.bin" it the old Winchester standard,
 						// but it does the same as IDE and does not boot correctly
 						// Activates with WDR.SAV, formats with WDX.SAV
-						//	Board.LoadROMCartridge(n,"ide_wd.bin",IdeWDbootCart);
-
-						// "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
-						Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);
+						
+						if(HDD_LBA[n-1]) Board.LoadROMCartridge(n,"ide_wd.bin",IdeWDbootCart);
+						else {
+							// The usual case
+							// "ide_hdbootv0400.bin" with IDDRIV.SAV, IDINST.SAV
+							Board.LoadROMCartridge(n,"ide_boot.bin",IdeHDbootCart);
+							}
 				}
 			HardDrives[n-1].AttachImage(filename, bytes);
 			HDs = true;

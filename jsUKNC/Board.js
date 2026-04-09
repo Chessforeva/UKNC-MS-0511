@@ -120,6 +120,10 @@ function init() {
 
 init();		// now
 
+// This allows reset hard disk controllers
+this.HardDriveReInit = function(/*int*/ c) {
+	HardDrives[c-1] = HDD_LBA[c-1] ? new HardDriveLBA(c-1) : new HardDrive(c-1);
+}
 
 /*void*/ this.Reset = function()
 {
@@ -234,7 +238,8 @@ this.LoadROMCartridge = function(/*int*/ cartno, FileName, /*uint8_t*/ bBuffer) 
 this.CartInfo = function() {
 	var s = "";
 	for(var i in ROMCart) {
-		if(ROMCart[i].length) s+='<font color="white">[Slot '+(parseInt(i)+1)+':'+ CartNames[i] + ']</font> ';
+		if(ROMCart[i].length) s+='<font color="white">[Slot '+(parseInt(i)+1)+':'+ CartNames[i] + ']' +
+			(HDD_LBA[i] ? "(LBA)":"") + '</font> ';
 		}
 	return s;
 }

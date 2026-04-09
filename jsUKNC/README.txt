@@ -17,6 +17,7 @@ Sounds additions from 03.2026.
 Samples and newest games updates too.
 Hard disks boths slots - verified ok.
 
+LBA28 for fast HDD, the BadApple covox demo, addition 04.2026 
 
 
 Blog: https://bezjega.blogspot.com/2021/03/uknc-emulator-online.html
@@ -64,7 +65,18 @@ Nothing is uploaded to the server on a file-drop onto the emulator.
 https://hobot.pdp-11.ru/EMULATORS/UKNCBTL_HDD/uknc_hdd_id/
 
 
-3. Other:
+3. The Bad Apple Covox emulation
+https://github.com/blairecas/badapple/tree/main
+Download the bappwd.img (54 Mb) file and drop onto the emulator, restart F12.
+So, Boot HDD from cartridge.
+Covox, 2t  - optimal smooth sounds.
+Note:
+  If it runs too fast then adjust the speed options.
+  It is LBA28 fast HDD for standard WD ROM. For this demo it finds by default.
+
+
+
+4. Other:
 
 https://hobot.pdp-11.ru/ukdwk_archive/ukncbtlwebcomplekt/best_GAMES_UKNC/bestgamesUKNC.dsk
 
