@@ -98,10 +98,15 @@ var WindoW = winWiHi();
 	width:750px;height:566px;
         border: 2px dashed #333333; border-radius: 5px;
         text-align: center; font: 12pt bold; color: black;">
-<div id="filesloaded" style="display:inline">
-<font color="white">Drop a .uknc .dsk(floppy) .sav(.gam,.gme) .rom, .ram(cart.), .img(IDE) file here, or zipped one, or 
-<span id="browseBtn" style="text-decoration: underline; cursor: pointer; background-color: #184079; color: white;">[browse]</span>.
-</font></div>
+<font color="white">
+<div id="browseBtn" style="position:absolute; left:10px; background:#184079; color:white;
+		text-decoration: underline; cursor: pointer;
+        background-color: #184079;">[browse]</div>
+<div id="filesloaded" style="display:inline;">
+or drop .uknc .dsk(floppy) .sav(.gam,.gme) .rom,.ram(cart.),.img(IDE) file, or zipped. 
+</div>
+</font>
+
 <input type="file" id="fileInput" style="display: none;">
 
 <div id="download_zone" style="color:blue;display:inline;visibility:hidden">
