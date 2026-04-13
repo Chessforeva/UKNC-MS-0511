@@ -31,16 +31,16 @@ var TouchesNow = 0;
 
 function AddKeyButtons()
 {
-    addKey( "Esc",0, 4,  774,10, 90,90 );
-    addKey( "Enter",0, 107,  870,10, 180,90 );
+    addKey( "Esc",0, 4,  774,10, 100,100 );
+    addKey( "Enter",0, 107,  880,10, 206,100 );
     
-    addKey( "Left",0, 78,  764,130, 100,220 );
-    addKey( "Up",0, 108,  870,116, 100,110 );
-    addKey( "Down",0, 92,  870,240, 100,110 );
-    addKey( "Right",0, 91,  976,130, 100,220 );
+    addKey( "Left",0, 78,  760,136, 110,230 );
+    addKey( "Up",0, 108,  870,116, 110,125 );
+    addKey( "Down",0, 92,  870,245, 110,125 );
+    addKey( "Right",0, 91,  980,136, 110,230 );
     
-    addKey( "Shift",0, 69,  934, 386, 140,90 );
-    addKey( "Space",0, 75,  764,386, 160,90 );
+    addKey( "Shift",0, 69,  964, 386, 124,100 );
+    addKey( "Space",0, 75,  760,380, 200,130 );
 }
 
 KBF_ = [];
