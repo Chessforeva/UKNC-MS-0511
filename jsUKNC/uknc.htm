@@ -132,6 +132,7 @@ or drop .uknc .dsk(floppy) .sav(.gam,.gme) .rom,.ram(cart.),.img(IDE) file, or z
   <option value="aDSK0">Add empty disk</option>
   <option value="*1">--------------------</option>
   <option value="FScr">FullScreen (Alt+Enter)</option>
+  <option value="FScC">FullScreen canvas</option>
   <option value="RST1">Reset restart (F12)</option>  
   <option value="RLD">Reload clear all</option>
   <option value="DBG">Debug (F9)</option>
@@ -330,6 +331,7 @@ CR = String.fromCharCode(13)+String.fromCharCode(10);
 function GE(id) { return document.getElementById(id); }
 
 var FullScreen = 0;	// Ctrl+Enter switch to FullScreen mode
+var FullScrCanv = 0;	// canvas (1) or window (0)
 var LOADDSK = [];	// to know disks to load
 
 // prevent selections
@@ -551,7 +553,8 @@ function userBoot() {
  case "UKB": Board.LoadFromImage(UkncBasic,1); scr.DRAW(); break;
  case "UKZ": Board.LoadFromImage(UkncZagruzka,1); scr.DRAW(); break;
  case "aDSK0": LOADDSK = ["EMPTY.zip"]; GoDisks(); O.value = "*1"; break;
- case "FScr": openFullscreen(); O.value = "*1"; break;
+ case "FScr": openFullscreen(0); O.value = "*1"; break;
+ case "FScC": openFullscreen(1); O.value = "*1"; break;
  case "RST1":
  case "RST2":
   Board.Reset(); scr.DRAW(); O.value = "*1"; break;
@@ -618,7 +621,7 @@ function userLoop3sec()
  
 if(FullScreen) {
 
- if(FullScreen==0.5) { openFullscreen(); return; }
+ if(FullScreen==0.5) { openFullscreen(0); return; }
  if(FullScreen==1 && isFullscreen()) {
  
  WindoW = winWiHi();
@@ -659,7 +662,8 @@ if(FullScreen) {
  
  if( FullScreen==3 && !isFullscreen() ) {	// Exited Fullscreen mode
  
- 	if(MOBILE_) {
+ 	if(FullScrCanv) {
+	FullScrCanv = 0;
 	FullScreen = 0;
 	}
 	else {
@@ -781,7 +785,7 @@ if(Q!=null) {
 	q.style.top = "762px";
 	R.style.visibility = "hidden";
 	r.innerHTML='<input type="checkbox" class="Ckbx" '+
-		'title="Turn on FullScreen mode" onclick="openFullscreen();">FullScreen<br>';
+		'title="Turn on FullScreen mode" onclick="openFullscreen(0);">FullScreen<br>';
 	}
 	
 	touchShow(Touch_Buttons);
@@ -978,9 +982,9 @@ function download_uknc() {
     a.click();
 }
 
-function openFullscreen() {
-
-var E = (MOBILE_ ? GE("UKNC_canvas") : document.documentElement );
+function openFullscreen(canv) {
+FullScrCanv = canv || MOBILE_;
+var E = (FullScrCanv ? GE("UKNC_canvas") : document.documentElement );
 if (E) {
     if (E.requestFullscreen) {
         E.requestFullscreen();
@@ -992,7 +996,7 @@ if (E) {
         E.mozRequestFullScreen();
     }
 }  
-  FullScreen=( MOBILE_ ? 3 : 1);
+  FullScreen=( FullScrCanv ? 3 : 1);
 }
 
 
